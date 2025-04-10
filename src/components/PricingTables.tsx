@@ -30,11 +30,11 @@ const PRICING_CONFIG = {
     Network: {
       quarterly: {
         price: "$1,000",
-        stripePriceId: "price_placeholder_network_quarterly"
+        stripePriceId: "price_1RCCrWIA2rpN54RVBWgABDBR"  // Updated Network quarterly
       },
       annually: {
         price: "$3,000",
-        stripePriceId: "price_placeholder_network_annually"
+        stripePriceId: "price_1RCCrWIA2rpN54RV3MsM4gVl"  // Updated Network annual
       }
     },
     Elite: {
