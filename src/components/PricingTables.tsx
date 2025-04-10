@@ -21,12 +21,12 @@ const PricingTables = () => {
         "Get discovered by engaged couples and industry peers",
         "Multi-channel brand visibility across all platforms",
         "Curated global network association",
-        "Wedded Partner Badge for your website & marketing",
+        "Wedded Network Badge for your website & marketing",
         "Professional profile with portfolio showcase"
       ],
       missingFeatures: [
         "B2B Private Community Access",
-        "Wedded Week Global Platform",
+        "Wedded Week Global placement",
         "Exclusive Masterclasses",
         "Priority Feature Opportunities",
         "Direct Referral Program"
@@ -48,15 +48,13 @@ const PricingTables = () => {
         "Monthly engagement opportunities",
         "Industry updates and insider insights",
         "Collaboration & partnership opportunities",
-        "Early access to Wedded initiatives",
-        "Cross-promotional opportunities"
+        "Early access to Wedded initiatives"
       ],
       missingFeatures: [
-        "Wedded Week Global Platform",
+        "Wedded Week Global placement",
         "Exclusive Masterclasses",
         "Priority Feature Opportunities"
       ],
-      featured: true,
       primaryBenefit: "Community & Collaboration",
       roi: "Avg. 5x return in referrals & bookings",
       color: "from-wedding-deep-purple/40 to-wedding-deep-purple/20"
@@ -69,17 +67,15 @@ const PricingTables = () => {
       description: "The ultimate growth platform for industry leaders",
       features: [
         "Everything in Network package",
-        "Wedded Week Global Platform ($750 value)",
+        "Wedded Week Global placement",
         "12 Exclusive Masterclasses ($2,000 value)",
         "Priority Feature Opportunities",
-        "Build Your Luxury Wedding Business Series",
         "Expert workshops & mentor access",
-        "Featured in global digital wedding expo",
-        "VIP concierge client referral service",
         "Exclusive industry events & summits",
-        "Direct access to Wedded leadership team"
+        "VIP concierge client referral service"
       ],
       missingFeatures: [],
+      featured: true,
       primaryBenefit: "Transformation & Growth",
       roi: "Avg. 8x return in business growth",
       color: "from-wedding-light-purple/40 to-wedding-deep-purple/30"
@@ -99,7 +95,6 @@ const PricingTables = () => {
             Select the perfect partnership level that aligns with your vision and transforms your wedding business on the global stage.
           </p>
           
-          {/* Billing toggle */}
           <div className="flex flex-col items-center justify-center mb-10">
             <div className="flex items-center space-x-2 bg-white p-1 rounded-full border border-gray-200 shadow-sm">
               <ToggleGroup 
@@ -128,7 +123,6 @@ const PricingTables = () => {
           </div>
         </div>
         
-        {/* Mobile Pricing Table View */}
         {isMobile ? (
           <div className="space-y-6">
             {pricingTables.map((plan, index) => (
@@ -180,7 +174,6 @@ const PricingTables = () => {
                     <p className="text-xs font-medium text-wedding-deep-purple">{plan.roi}</p>
                   </div>
                   
-                  {/* Collapsible Feature List */}
                   <details className="mb-4">
                     <summary className="cursor-pointer text-sm font-medium text-wedding-deep-purple flex items-center">
                       View All Features <ArrowRight className="ml-1 h-3 w-3" />
@@ -217,7 +210,6 @@ const PricingTables = () => {
             ))}
           </div>
         ) : (
-          // Desktop view remains the same
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 overflow-x-auto">
             {pricingTables.map((plan, index) => (
               <div 
