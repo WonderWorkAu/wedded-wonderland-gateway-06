@@ -3,7 +3,6 @@ import { loadStripe } from '@stripe/stripe-js';
 import { toast } from '@/components/ui/use-toast';
 
 // Initialize Stripe with your publishable key
-// Using a key that matches the format expected by Stripe
 const stripePromise = loadStripe('pk_live_6SIAPyVk7F1B8fDhK2cvmzG5');
 
 interface CreateCheckoutSessionParams {
@@ -13,6 +12,7 @@ interface CreateCheckoutSessionParams {
   planName: string;
 }
 
+// Client-only checkout implementation
 export async function createCheckoutSession({
   priceId,
   customerType,
@@ -23,38 +23,20 @@ export async function createCheckoutSession({
     const stripe = await stripePromise;
     if (!stripe) throw new Error('Stripe failed to initialize');
     
-    // Create a checkout session server-side using fetch
-    const response = await fetch('/api/create-checkout-session', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        priceId,
-        customerType,
-        billingCycle,
-        planName,
-        successUrl: `${window.location.origin}/success?plan=${planName}&type=${customerType}`,
-        cancelUrl: `${window.location.origin}/pricing?canceled=true`,
-      }),
+    // Redirect to Stripe Checkout using priceId directly
+    const { error } = await stripe.redirectToCheckout({
+      lineItems: [
+        { price: priceId, quantity: 1 }
+      ],
+      mode: 'subscription',
+      successUrl: `${window.location.origin}/success?plan=${planName}&type=${customerType}`,
+      cancelUrl: `${window.location.origin}/pricing?canceled=true`,
     });
     
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to create checkout session');
+    if (error) {
+      console.error('Stripe checkout error:', error);
+      throw error;
     }
-    
-    const { sessionId } = await response.json();
-    
-    // Redirect to checkout
-    const result = await stripe.redirectToCheckout({
-      sessionId,
-    });
-    
-    if (result.error) {
-      throw result.error;
-    }
-    
   } catch (error) {
     console.error('Error creating checkout session:', error);
     toast({
@@ -62,15 +44,17 @@ export async function createCheckoutSession({
       description: "We couldn't process your request. Please try again later or contact support.",
       variant: "destructive",
     });
+    
+    // Use the fallback method when direct checkout fails
+    await handleCheckoutFallback(planName);
     throw error;
   }
 }
 
-// Fallback implementation that directly opens a new tab to your product page
+// Fallback implementation that directly opens a new tab to your contact page
 export async function handleCheckoutFallback(planName: string) {
   try {
     // This is a fallback method that simply opens your contact page
-    // or a direct link to your product in Stripe's hosted checkout
     const url = `https://yourcompany.com/contact?plan=${planName}`;
     window.open(url, '_blank');
     

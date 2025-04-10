@@ -218,20 +218,14 @@ const PricingTables = () => {
         throw new Error('Price ID not found');
       }
       
-      try {
-        // First try the direct Stripe checkout method
-        await createCheckoutSession({
-          priceId,
-          customerType,
-          billingCycle,
-          planName: plan
-        });
-      } catch (stripeError) {
-        console.error("Stripe checkout failed, using fallback method:", stripeError);
-        
-        // If the Stripe checkout fails, use our fallback method
-        await handleCheckoutFallback(plan);
-      }
+      // Use the client-only checkout method
+      await createCheckoutSession({
+        priceId,
+        customerType,
+        billingCycle,
+        planName: plan
+      });
+      
     } catch (error) {
       console.error('Checkout error:', error);
       toast({
