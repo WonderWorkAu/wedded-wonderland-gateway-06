@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Check, X, ArrowRight, Star, Diamond, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -129,88 +128,179 @@ const PricingTables = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 overflow-x-auto">
-          {pricingTables.map((plan, index) => (
-            <div 
-              key={index} 
-              className={`rounded-2xl overflow-hidden transition-all duration-300 ${
-                plan.featured 
-                  ? 'border-2 border-wedding-deep-purple shadow-2xl md:scale-105 md:z-10' 
-                  : 'border border-gray-200 shadow-xl hover:shadow-2xl hover:scale-102 hover:z-10'
-              } ${isMobile ? 'min-w-[300px]' : ''}`}
-            >
-              {plan.featured && (
-                <div className="bg-wedding-deep-purple text-white py-2 text-center font-semibold tracking-wider flex items-center justify-center gap-2">
-                  <Diamond className="h-4 w-4 fill-wedding-gold text-wedding-gold" />
-                  MOST POPULAR CHOICE
-                  <Diamond className="h-4 w-4 fill-wedding-gold text-wedding-gold" />
-                </div>
-              )}
-              
-              <div className="p-6 md:p-8 bg-white">
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-1">
-                    <h3 className="text-xl md:text-2xl font-bold text-wedding-deep-purple">
-                      {plan.name}
-                    </h3>
-                    <div className={`bg-gradient-to-r ${plan.color} p-1.5 rounded-full`}>
-                      <Star className="h-5 w-5 fill-wedding-gold text-wedding-gold" />
-                    </div>
+        {/* Mobile Pricing Table View */}
+        {isMobile ? (
+          <div className="space-y-6">
+            {pricingTables.map((plan, index) => (
+              <div 
+                key={index} 
+                className={`rounded-2xl overflow-hidden transition-all duration-300 ${
+                  plan.featured 
+                    ? 'border-2 border-wedding-deep-purple shadow-lg relative' 
+                    : 'border border-gray-200 shadow-md'
+                }`}
+              >
+                {plan.featured && (
+                  <div className="bg-wedding-deep-purple text-white py-2 text-center font-semibold tracking-wider flex items-center justify-center gap-2">
+                    <Diamond className="h-4 w-4 fill-wedding-gold text-wedding-gold" />
+                    MOST POPULAR
+                    <Diamond className="h-4 w-4 fill-wedding-gold text-wedding-gold" />
                   </div>
-                  <h4 className="text-lg md:text-xl font-medium mb-3 text-gray-700">
-                    {plan.title}
-                  </h4>
-                </div>
+                )}
                 
-                <div className="flex flex-col mb-4">
-                  <div className={`bg-gradient-to-br ${plan.color} p-4 md:p-6 rounded-lg mb-5`}>
-                    <div className="flex items-end mb-3">
-                      <span className="text-3xl md:text-5xl font-bold text-wedding-deep-purple">{plan.price}</span>
+                <div className="p-6 bg-white">
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xl font-bold text-wedding-deep-purple">
+                        {plan.name}
+                      </h3>
+                      <div className={`bg-gradient-to-r ${plan.color} p-1.5 rounded-full`}>
+                        <Star className="h-5 w-5 fill-wedding-gold text-wedding-gold" />
+                      </div>
+                    </div>
+                    <h4 className="text-lg font-medium text-gray-700">
+                      {plan.title}
+                    </h4>
+                  </div>
+                  
+                  <div className={`bg-gradient-to-br ${plan.color} p-4 rounded-lg mb-4`}>
+                    <div className="flex items-end mb-2">
+                      <span className="text-3xl font-bold text-wedding-deep-purple">{plan.price}</span>
                       <span className="text-gray-600 ml-1 mb-1">/{plan.period}</span>
                     </div>
-                    <p className="text-sm md:text-base text-gray-700 font-medium">{plan.description}</p>
+                    <p className="text-sm text-gray-700">{plan.description}</p>
                   </div>
                   
-                  <div className="mb-5 flex items-center text-wedding-gold">
-                    <Diamond className="h-5 w-5 mr-2 fill-wedding-gold text-wedding-gold" />
-                    <p className="font-semibold text-sm md:text-base">{plan.primaryBenefit}</p>
+                  <div className="mb-3 flex items-center text-wedding-gold">
+                    <Diamond className="h-4 w-4 mr-2 fill-wedding-gold text-wedding-gold" />
+                    <p className="font-semibold text-sm">{plan.primaryBenefit}</p>
                   </div>
                   
-                  <div className="bg-wedding-light-purple/10 p-3 md:p-4 rounded-lg text-center mb-5 border border-wedding-light-purple/20">
-                    <p className="text-xs md:text-sm font-medium text-wedding-deep-purple">{plan.roi}</p>
+                  <div className="bg-wedding-light-purple/10 p-3 rounded-lg text-center mb-4 border border-wedding-light-purple/20">
+                    <p className="text-xs font-medium text-wedding-deep-purple">{plan.roi}</p>
                   </div>
-                </div>
-                
-                <div className="mb-6 md:mb-8 space-y-3">
-                  {plan.features.map((feature, i) => (
-                    <div key={i} className="flex items-start">
-                      <Check className="h-4 md:h-5 w-4 md:w-5 text-green-500 mr-2 md:mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-xs md:text-sm">{feature}</span>
+                  
+                  {/* Collapsible Feature List */}
+                  <details className="mb-4">
+                    <summary className="cursor-pointer text-sm font-medium text-wedding-deep-purple flex items-center">
+                      View All Features <ArrowRight className="ml-1 h-3 w-3" />
+                    </summary>
+                    <div className="mt-3 space-y-2 pl-1 border-l-2 border-wedding-light-purple/30">
+                      {plan.features.map((feature, i) => (
+                        <div key={i} className="flex items-start">
+                          <Check className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                          <span className="text-xs">{feature}</span>
+                        </div>
+                      ))}
+                      
+                      {plan.missingFeatures.map((feature, i) => (
+                        <div key={i} className="flex items-start text-gray-400">
+                          <Lock className="h-4 w-4 text-gray-300 mr-2 mt-0.5 flex-shrink-0" />
+                          <span className="text-xs">{feature}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </details>
                   
-                  {plan.missingFeatures.map((feature, i) => (
-                    <div key={i} className="flex items-start text-gray-400">
-                      <Lock className="h-4 md:h-5 w-4 md:w-5 text-gray-300 mr-2 md:mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-xs md:text-sm">{feature}</span>
-                    </div>
-                  ))}
+                  <Button 
+                    className={`w-full font-semibold tracking-wider py-4 ${
+                      plan.featured 
+                        ? 'gold-button shadow-md flex items-center justify-center gap-1.5'
+                        : 'bg-wedding-deep-purple text-white hover:bg-wedding-purple flex items-center justify-center gap-1.5'
+                    }`}
+                  >
+                    {plan.featured ? 'APPLY NOW — BEST VALUE' : 'APPLY NOW'}
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Button>
                 </div>
-                
-                <Button 
-                  className={`w-full font-semibold tracking-wider ${
-                    plan.featured 
-                      ? 'gold-button shadow-xl flex items-center justify-center gap-2 py-5 md:py-7'
-                      : 'bg-wedding-deep-purple text-white hover:bg-wedding-purple flex items-center justify-center gap-2 py-5 md:py-7'
-                  }`}
-                >
-                  {plan.featured ? 'APPLY NOW — RECOMMENDED' : 'APPLY NOW'}
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          // Desktop view remains the same
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 overflow-x-auto">
+            {pricingTables.map((plan, index) => (
+              <div 
+                key={index} 
+                className={`rounded-2xl overflow-hidden transition-all duration-300 ${
+                  plan.featured 
+                    ? 'border-2 border-wedding-deep-purple shadow-2xl md:scale-105 md:z-10' 
+                    : 'border border-gray-200 shadow-xl hover:shadow-2xl hover:scale-102 hover:z-10'
+                }`}
+              >
+                {plan.featured && (
+                  <div className="bg-wedding-deep-purple text-white py-2 text-center font-semibold tracking-wider flex items-center justify-center gap-2">
+                    <Diamond className="h-4 w-4 fill-wedding-gold text-wedding-gold" />
+                    MOST POPULAR CHOICE
+                    <Diamond className="h-4 w-4 fill-wedding-gold text-wedding-gold" />
+                  </div>
+                )}
+                
+                <div className="p-6 md:p-8 bg-white">
+                  <div className="mb-6">
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="text-xl md:text-2xl font-bold text-wedding-deep-purple">
+                        {plan.name}
+                      </h3>
+                      <div className={`bg-gradient-to-r ${plan.color} p-1.5 rounded-full`}>
+                        <Star className="h-5 w-5 fill-wedding-gold text-wedding-gold" />
+                      </div>
+                    </div>
+                    <h4 className="text-lg md:text-xl font-medium mb-3 text-gray-700">
+                      {plan.title}
+                    </h4>
+                  </div>
+                  
+                  <div className="flex flex-col mb-4">
+                    <div className={`bg-gradient-to-br ${plan.color} p-4 md:p-6 rounded-lg mb-5`}>
+                      <div className="flex items-end mb-3">
+                        <span className="text-3xl md:text-5xl font-bold text-wedding-deep-purple">{plan.price}</span>
+                        <span className="text-gray-600 ml-1 mb-1">/{plan.period}</span>
+                      </div>
+                      <p className="text-sm md:text-base text-gray-700 font-medium">{plan.description}</p>
+                    </div>
+                    
+                    <div className="mb-5 flex items-center text-wedding-gold">
+                      <Diamond className="h-5 w-5 mr-2 fill-wedding-gold text-wedding-gold" />
+                      <p className="font-semibold text-sm md:text-base">{plan.primaryBenefit}</p>
+                    </div>
+                    
+                    <div className="bg-wedding-light-purple/10 p-3 md:p-4 rounded-lg text-center mb-5 border border-wedding-light-purple/20">
+                      <p className="text-xs md:text-sm font-medium text-wedding-deep-purple">{plan.roi}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="mb-6 md:mb-8 space-y-3">
+                    {plan.features.map((feature, i) => (
+                      <div key={i} className="flex items-start">
+                        <Check className="h-4 md:h-5 w-4 md:w-5 text-green-500 mr-2 md:mr-3 mt-0.5 flex-shrink-0" />
+                        <span className="text-xs md:text-sm">{feature}</span>
+                      </div>
+                    ))}
+                    
+                    {plan.missingFeatures.map((feature, i) => (
+                      <div key={i} className="flex items-start text-gray-400">
+                        <Lock className="h-4 md:h-5 w-4 md:w-5 text-gray-300 mr-2 md:mr-3 mt-0.5 flex-shrink-0" />
+                        <span className="text-xs md:text-sm">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <Button 
+                    className={`w-full font-semibold tracking-wider ${
+                      plan.featured 
+                        ? 'gold-button shadow-xl flex items-center justify-center gap-2 py-5 md:py-7'
+                        : 'bg-wedding-deep-purple text-white hover:bg-wedding-purple flex items-center justify-center gap-2 py-5 md:py-7'
+                    }`}
+                  >
+                    {plan.featured ? 'APPLY NOW — RECOMMENDED' : 'APPLY NOW'}
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         
         <div className="mt-10 md:mt-12 text-center">
           <p className="text-xs md:text-sm text-wedding-deep-purple/80 max-w-xl mx-auto">
