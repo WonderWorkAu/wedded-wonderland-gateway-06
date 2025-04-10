@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { Globe, Users, MegaphoneIcon, PhoneCall, Award, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const benefitsData = [
   {
@@ -37,6 +37,17 @@ const benefitsData = [
 ];
 
 const BenefitsSection = () => {
+  const navigate = useNavigate();
+
+  const handleScrollToPricing = () => {
+    const pricingSection = document.getElementById('pricing-section');
+    if (pricingSection) {
+      pricingSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      navigate('/pricing?scroll=true');
+    }
+  };
+
   return (
     <div className="section-padding bg-gradient-to-b from-white to-wedding-cream/20">
       <div className="container mx-auto px-4">
@@ -68,11 +79,11 @@ const BenefitsSection = () => {
           ))}
         </div>
         
-        <div className="mt-16 text-center">
-          <p className="text-lg text-wedding-deep-purple font-medium mb-6">
-            Ready to elevate your business to the next level?
-          </p>
-          <Button className="gold-button text-lg py-6 px-10 uppercase tracking-wider flex items-center gap-2">
+        <div className="mt-16 text-center flex justify-center">
+          <Button 
+            className="gold-button text-lg py-6 px-10 uppercase tracking-wider flex items-center gap-2"
+            onClick={handleScrollToPricing}
+          >
             APPLY TO JOIN TODAY
             <ArrowRight className="h-5 w-5" />
           </Button>
