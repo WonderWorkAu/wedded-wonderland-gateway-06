@@ -10,6 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { createCheckoutSession, handleCheckoutFallback } from '@/utils/stripe';
 import { toast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 type CustomerType = 'vendor' | 'venue';
 type BillingCycle = 'annually' | 'quarterly';
@@ -76,6 +77,7 @@ const PricingTables = () => {
   const [customerType, setCustomerType] = useState<CustomerType>('vendor');
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   
   const vendorPricingTables = [
     {
