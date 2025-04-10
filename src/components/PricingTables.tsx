@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Check, X, ArrowRight, Star, Diamond, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { createCheckoutSession } from '@/utils/stripe';
+import { createCheckoutSession, handleCheckoutFallback } from '@/utils/stripe';
 import { toast } from '@/components/ui/use-toast';
 
 type CustomerType = 'vendor' | 'venue';
@@ -219,19 +218,28 @@ const PricingTables = () => {
         throw new Error('Price ID not found');
       }
       
-      await createCheckoutSession({
-        priceId,
-        customerType,
-        billingCycle,
-        planName: plan
-      });
+      try {
+        // First try the direct Stripe checkout method
+        await createCheckoutSession({
+          priceId,
+          customerType,
+          billingCycle,
+          planName: plan
+        });
+      } catch (stripeError) {
+        console.error("Stripe checkout failed, using fallback method:", stripeError);
+        
+        // If the Stripe checkout fails, use our fallback method
+        await handleCheckoutFallback(plan);
+      }
     } catch (error) {
       console.error('Checkout error:', error);
       toast({
         title: "Checkout Failed",
-        description: "There was an issue processing your request. Please try again.",
+        description: "There was an issue processing your request. Please try again or contact us directly.",
         variant: "destructive"
       });
+    } finally {
       setIsProcessing(null);
     }
   };
