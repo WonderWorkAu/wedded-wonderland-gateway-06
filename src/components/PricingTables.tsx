@@ -9,13 +9,74 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { createCheckoutSession } from '@/utils/stripe';
+import { toast } from '@/components/ui/use-toast';
 
 type CustomerType = 'vendor' | 'venue';
 type BillingCycle = 'annually' | 'quarterly';
 
+// Pricing details with Stripe integration
+const PRICING_CONFIG = {
+  vendor: {
+    Directory: {
+      quarterly: {
+        price: "$500",
+        stripePriceId: "price_placeholder_directory_quarterly"
+      },
+      annually: {
+        price: "$1,500",
+        stripePriceId: "price_placeholder_directory_annually"
+      }
+    },
+    Network: {
+      quarterly: {
+        price: "$1,000",
+        stripePriceId: "price_placeholder_network_quarterly"
+      },
+      annually: {
+        price: "$3,000",
+        stripePriceId: "price_placeholder_network_annually"
+      }
+    },
+    Elite: {
+      quarterly: {
+        price: "$1,950",
+        stripePriceId: "price_1RCCTaIA2rpN54RVHKxj96fo"  // Elite quarterly
+      },
+      annually: {
+        price: "$5,750",
+        stripePriceId: "price_1RCCTaIA2rpN54RVvwtb9uLR"  // Elite annual
+      }
+    }
+  },
+  venue: {
+    "Venue Listing": {
+      quarterly: {
+        price: "$850",
+        stripePriceId: "price_placeholder_venue_listing_quarterly"
+      },
+      annually: {
+        price: "$2,500",
+        stripePriceId: "price_placeholder_venue_listing_annually"
+      }
+    },
+    "Venue Elite": {
+      quarterly: {
+        price: "$1,650",
+        stripePriceId: "price_placeholder_venue_elite_quarterly"
+      },
+      annually: {
+        price: "$4,750",
+        stripePriceId: "price_placeholder_venue_elite_annually"
+      }
+    }
+  }
+};
+
 const PricingTables = () => {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('annually');
   const [customerType, setCustomerType] = useState<CustomerType>('vendor');
+  const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const isMobile = useIsMobile();
   
   const vendorPricingTables = [
@@ -145,6 +206,35 @@ const PricingTables = () => {
   ];
   
   const pricingTables = customerType === 'vendor' ? vendorPricingTables : venuePricingTables;
+
+  // Handle checkout
+  const handleCheckout = async (plan: string) => {
+    try {
+      setIsProcessing(plan);
+      
+      // Get the appropriate price ID from our config
+      const priceId = PRICING_CONFIG[customerType]?.[plan]?.[billingCycle]?.stripePriceId;
+      
+      if (!priceId) {
+        throw new Error('Price ID not found');
+      }
+      
+      await createCheckoutSession({
+        priceId,
+        customerType,
+        billingCycle,
+        planName: plan
+      });
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast({
+        title: "Checkout Failed",
+        description: "There was an issue processing your request. Please try again.",
+        variant: "destructive"
+      });
+      setIsProcessing(null);
+    }
+  };
 
   return (
     <div className="section-padding bg-gradient-to-b from-white to-wedding-cream/30 px-4 md:px-0">
@@ -293,9 +383,17 @@ const PricingTables = () => {
                         ? 'gold-button shadow-md'
                         : 'bg-wedding-deep-purple text-white hover:bg-wedding-purple'
                     }`}
+                    disabled={isProcessing !== null}
+                    onClick={() => handleCheckout(plan.name)}
                   >
-                    {plan.featured ? 'APPLY NOW — BEST VALUE' : 'APPLY NOW'}
-                    <ArrowRight className="h-3.5 w-3.5" />
+                    {isProcessing === plan.name ? (
+                      <span className="flex items-center gap-2">Processing...</span>
+                    ) : (
+                      <span className="flex items-center gap-1">
+                        {plan.featured ? 'APPLY NOW — BEST VALUE' : 'APPLY NOW'}
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </span>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -314,7 +412,7 @@ const PricingTables = () => {
                   }`}
                 >
                   {plan.featured && (
-                    <div className="bg-wedding-deep-purple text-white py-2 text-center font-semibold tracking-wider flex items-center justify-center gap-2">
+                    <div className="bg-wedding-deep-purple text-white py-2 text-center font-semibold tracking-wider flex items-center justify-center gap-2 overflow-visible">
                       <Diamond className="h-4 w-4 fill-wedding-gold text-wedding-gold" />
                       MOST POPULAR CHOICE
                       <Diamond className="h-4 w-4 fill-wedding-gold text-wedding-gold" />
@@ -381,12 +479,20 @@ const PricingTables = () => {
                     <Button 
                       className={`w-full font-semibold text-sm tracking-wider mt-auto ${
                         plan.featured 
-                          ? 'gold-button shadow-md py-5 md:py-6'
-                          : 'bg-wedding-deep-purple text-white hover:bg-wedding-purple py-5 md:py-6'
+                          ? 'gold-button shadow-md py-5'
+                          : 'bg-wedding-deep-purple text-white hover:bg-wedding-purple py-5'
                       }`}
+                      disabled={isProcessing !== null}
+                      onClick={() => handleCheckout(plan.name)}
                     >
-                      {plan.featured ? 'APPLY NOW — BEST VALUE' : 'APPLY NOW'}
-                      <ArrowRight className="h-4 w-4" />
+                      {isProcessing === plan.name ? (
+                        <span className="flex items-center gap-2">Processing...</span>
+                      ) : (
+                        <span className="flex items-center gap-2 whitespace-nowrap">
+                          {plan.featured ? 'APPLY NOW — BEST VALUE' : 'APPLY NOW'}
+                          <ArrowRight className="h-4 w-4 flex-shrink-0" />
+                        </span>
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -402,7 +508,7 @@ const PricingTables = () => {
                   }`}
                 >
                   {plan.featured && (
-                    <div className="bg-wedding-deep-purple text-white py-2 text-center font-semibold tracking-wider flex items-center justify-center gap-2">
+                    <div className="bg-wedding-deep-purple text-white py-2 text-center font-semibold tracking-wider flex items-center justify-center gap-2 overflow-visible">
                       <Diamond className="h-4 w-4 fill-wedding-gold text-wedding-gold" />
                       PREMIUM VENUE SOLUTION
                       <Diamond className="h-4 w-4 fill-wedding-gold text-wedding-gold" />
@@ -469,12 +575,20 @@ const PricingTables = () => {
                     <Button 
                       className={`w-full font-semibold text-sm tracking-wider mt-auto ${
                         plan.featured 
-                          ? 'gold-button shadow-md py-5 md:py-6'
-                          : 'bg-wedding-deep-purple text-white hover:bg-wedding-purple py-5 md:py-6'
+                          ? 'gold-button shadow-md py-5'
+                          : 'bg-wedding-deep-purple text-white hover:bg-wedding-purple py-5'
                       }`}
+                      disabled={isProcessing !== null}
+                      onClick={() => handleCheckout(plan.name)}
                     >
-                      {plan.featured ? 'APPLY NOW — PREMIUM CHOICE' : 'APPLY NOW'}
-                      <ArrowRight className="h-4 w-4" />
+                      {isProcessing === plan.name ? (
+                        <span className="flex items-center gap-2">Processing...</span>
+                      ) : (
+                        <span className="flex items-center gap-2 whitespace-nowrap">
+                          {plan.featured ? 'APPLY NOW — PREMIUM CHOICE' : 'APPLY NOW'}
+                          <ArrowRight className="h-4 w-4 flex-shrink-0" />
+                        </span>
+                      )}
                     </Button>
                   </div>
                 </div>
