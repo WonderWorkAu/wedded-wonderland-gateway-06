@@ -1,19 +1,29 @@
+
 import React, { useState } from 'react';
 import { Check, X, ArrowRight, Star, Diamond, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Card, CardContent } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+
+type CustomerType = 'vendor' | 'venue';
+type BillingCycle = 'annually' | 'quarterly';
 
 const PricingTables = () => {
-  const [billingCycle, setBillingCycle] = useState<'annually' | 'quarterly'>('annually');
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>('annually');
+  const [customerType, setCustomerType] = useState<CustomerType>('vendor');
   const isMobile = useIsMobile();
   
-  const pricingTables = [
+  const vendorPricingTables = [
     {
       name: "Directory",
       title: "Get Discovered",
-      price: billingCycle === 'annually' ? "$1,500" : "$450",
+      quarterlyPrice: "$500",
+      annualPrice: "$1,500",
       period: billingCycle,
       description: "Your essential gateway to the global luxury wedding market",
       features: [
@@ -38,7 +48,8 @@ const PricingTables = () => {
     {
       name: "Network",
       title: "Get Connected",
-      price: billingCycle === 'annually' ? "$3,000" : "$900",
+      quarterlyPrice: "$1,000",
+      annualPrice: "$3,000",
       period: billingCycle,
       description: "The complete solution for serious wedding professionals",
       features: [
@@ -62,7 +73,8 @@ const PricingTables = () => {
     {
       name: "Elite",
       title: "Get Elevated",
-      price: billingCycle === 'annually' ? "$5,750" : "$1,750",
+      quarterlyPrice: "$1,950",
+      annualPrice: "$5,750",
       period: billingCycle,
       description: "The ultimate growth platform for industry leaders",
       features: [
@@ -81,6 +93,58 @@ const PricingTables = () => {
       color: "from-wedding-light-purple/40 to-wedding-deep-purple/30"
     }
   ];
+  
+  const venuePricingTables = [
+    {
+      name: "Venue Listing",
+      title: "Showcase Your Space",
+      quarterlyPrice: "$850",
+      annualPrice: "$2,500",
+      period: billingCycle,
+      description: "Premium visibility for your unique venue",
+      features: [
+        "Vendor Directory Listing",
+        "PR & Social Media Assets",
+        "Member Badge",
+        "Editorial Mention",
+        "Professional venue profile with gallery",
+        "Venue-specific search filters",
+        "Targeted exposure to planners & couples"
+      ],
+      missingFeatures: [
+        "Advanced booking management tools",
+        "Premium placement in search results",
+        "Dedicated venue promotion campaigns"
+      ],
+      primaryBenefit: "Venue Visibility",
+      roi: "Avg. 4x return in venue bookings",
+      color: "from-wedding-gold/40 to-wedding-gold/20"
+    },
+    {
+      name: "Venue Elite",
+      title: "Premium Venue Partner",
+      quarterlyPrice: "$1,650",
+      annualPrice: "$4,750",
+      period: billingCycle,
+      description: "Complete promotion & booking solution for distinctive venues",
+      features: [
+        "Everything in Venue Listing package",
+        "Premium placement in venue search",
+        "Featured venue campaigns",
+        "Virtual tour integration",
+        "Direct planner connections",
+        "Venue booking optimization",
+        "Industry event hosting opportunities"
+      ],
+      missingFeatures: [],
+      featured: true,
+      primaryBenefit: "Premium Promotion & Bookings",
+      roi: "Avg. 6x return in venue business",
+      color: "from-wedding-light-purple/40 to-wedding-deep-purple/30"
+    }
+  ];
+  
+  const pricingTables = customerType === 'vendor' ? vendorPricingTables : venuePricingTables;
 
   return (
     <div className="section-padding bg-gradient-to-b from-white to-wedding-cream/30 px-4 md:px-0">
@@ -95,6 +159,27 @@ const PricingTables = () => {
             Select the perfect partnership level that aligns with your vision and transforms your wedding business on the global stage.
           </p>
           
+          {/* Customer Type Selector */}
+          <div className="flex flex-col items-center justify-center mb-8">
+            <div className="flex items-center gap-3 mb-4 bg-white p-3 rounded-full shadow-sm border border-gray-200 max-w-xs mx-auto">
+              <div className="flex items-center space-x-2 w-full justify-between">
+                <Label htmlFor="customer-toggle" className={`text-sm font-medium cursor-pointer ${customerType === 'vendor' ? 'text-wedding-deep-purple' : 'text-gray-500'}`}>
+                  I am a Vendor
+                </Label>
+                <Switch
+                  id="customer-toggle"
+                  checked={customerType === 'venue'}
+                  onCheckedChange={(checked) => setCustomerType(checked ? 'venue' : 'vendor')}
+                  className="data-[state=checked]:bg-wedding-deep-purple"
+                />
+                <Label htmlFor="customer-toggle" className={`text-sm font-medium cursor-pointer ${customerType === 'venue' ? 'text-wedding-deep-purple' : 'text-gray-500'}`}>
+                  I am a Venue
+                </Label>
+              </div>
+            </div>
+          </div>
+          
+          {/* Billing Cycle Toggle */}
           <div className="flex flex-col items-center justify-center mb-10">
             <div className="flex items-center space-x-2 bg-white p-1 rounded-full border border-gray-200 shadow-sm">
               <ToggleGroup 
@@ -116,7 +201,7 @@ const PricingTables = () => {
                   aria-label="Toggle annual billing"
                   className={`rounded-full px-5 py-2 text-sm transition-all ${billingCycle === 'annually' ? 'bg-wedding-deep-purple text-white' : 'bg-transparent text-gray-600'}`}
                 >
-                  Annually <span className="ml-1 text-xs bg-wedding-gold/20 text-wedding-deep-purple px-2 py-0.5 rounded-full">Save 15%</span>
+                  Annually <span className="ml-1 text-xs bg-wedding-gold/20 text-wedding-deep-purple px-2 py-0.5 rounded-full">Save 25%</span>
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
@@ -158,9 +243,16 @@ const PricingTables = () => {
                   </div>
                   
                   <div className={`bg-gradient-to-br ${plan.color} p-4 rounded-lg mb-4`}>
-                    <div className="flex items-end mb-2">
-                      <span className="text-3xl font-bold text-wedding-deep-purple">{plan.price}</span>
-                      <span className="text-gray-600 ml-1 mb-1">/{plan.period}</span>
+                    <div className="flex flex-col mb-2">
+                      <div className="flex items-end">
+                        <span className="text-3xl font-bold text-wedding-deep-purple">
+                          {billingCycle === 'annually' ? plan.annualPrice : plan.quarterlyPrice}
+                        </span>
+                        <span className="text-gray-600 ml-1 mb-1">/{billingCycle === 'annually' ? 'year' : 'quarter'}</span>
+                      </div>
+                      {billingCycle === 'quarterly' && (
+                        <div className="text-xs text-gray-600 mt-1">Annual: {plan.annualPrice}</div>
+                      )}
                     </div>
                     <p className="text-sm text-gray-700">{plan.description}</p>
                   </div>
@@ -196,10 +288,10 @@ const PricingTables = () => {
                   </details>
                   
                   <Button 
-                    className={`w-full font-semibold tracking-wider py-4 ${
+                    className={`w-full font-semibold py-4 ${
                       plan.featured 
-                        ? 'gold-button shadow-md flex items-center justify-center gap-1.5'
-                        : 'bg-wedding-deep-purple text-white hover:bg-wedding-purple flex items-center justify-center gap-1.5'
+                        ? 'gold-button shadow-md'
+                        : 'bg-wedding-deep-purple text-white hover:bg-wedding-purple'
                     }`}
                   >
                     {plan.featured ? 'APPLY NOW — BEST VALUE' : 'APPLY NOW'}
@@ -210,87 +302,184 @@ const PricingTables = () => {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 overflow-x-auto">
-            {pricingTables.map((plan, index) => (
-              <div 
-                key={index} 
-                className={`rounded-2xl overflow-hidden transition-all duration-300 ${
-                  plan.featured 
-                    ? 'border-2 border-wedding-deep-purple shadow-2xl md:scale-105 md:z-10' 
-                    : 'border border-gray-200 shadow-xl hover:shadow-2xl hover:scale-102 hover:z-10'
-                }`}
-              >
-                {plan.featured && (
-                  <div className="bg-wedding-deep-purple text-white py-2 text-center font-semibold tracking-wider flex items-center justify-center gap-2">
-                    <Diamond className="h-4 w-4 fill-wedding-gold text-wedding-gold" />
-                    MOST POPULAR CHOICE
-                    <Diamond className="h-4 w-4 fill-wedding-gold text-wedding-gold" />
-                  </div>
-                )}
-                
-                <div className="p-6 md:p-8 bg-white">
-                  <div className="mb-6">
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="text-xl md:text-2xl font-bold text-wedding-deep-purple">
-                        {plan.name}
-                      </h3>
-                      <div className={`bg-gradient-to-r ${plan.color} p-1.5 rounded-full`}>
-                        <Star className="h-5 w-5 fill-wedding-gold text-wedding-gold" />
-                      </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            {customerType === 'vendor' ? (
+              pricingTables.map((plan, index) => (
+                <div 
+                  key={index} 
+                  className={`rounded-2xl overflow-hidden relative transition-all duration-300 ${
+                    plan.featured 
+                      ? 'border-2 border-wedding-deep-purple shadow-2xl md:scale-105 md:z-10' 
+                      : 'border border-gray-200 shadow-xl hover:shadow-2xl hover:scale-102 hover:z-10'
+                  }`}
+                >
+                  {plan.featured && (
+                    <div className="bg-wedding-deep-purple text-white py-2 text-center font-semibold tracking-wider flex items-center justify-center gap-2">
+                      <Diamond className="h-4 w-4 fill-wedding-gold text-wedding-gold" />
+                      MOST POPULAR CHOICE
+                      <Diamond className="h-4 w-4 fill-wedding-gold text-wedding-gold" />
                     </div>
-                    <h4 className="text-lg md:text-xl font-medium mb-3 text-gray-700">
-                      {plan.title}
-                    </h4>
-                  </div>
+                  )}
                   
-                  <div className="flex flex-col mb-4">
-                    <div className={`bg-gradient-to-br ${plan.color} p-4 md:p-6 rounded-lg mb-5`}>
-                      <div className="flex items-end mb-3">
-                        <span className="text-3xl md:text-5xl font-bold text-wedding-deep-purple">{plan.price}</span>
-                        <span className="text-gray-600 ml-1 mb-1">/{plan.period}</span>
+                  <div className="p-6 md:p-8 bg-white h-full flex flex-col">
+                    <div className="mb-6">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-xl md:text-2xl font-bold text-wedding-deep-purple">
+                          {plan.name}
+                        </h3>
+                        <div className={`bg-gradient-to-r ${plan.color} p-1.5 rounded-full`}>
+                          <Star className="h-5 w-5 fill-wedding-gold text-wedding-gold" />
+                        </div>
                       </div>
-                      <p className="text-sm md:text-base text-gray-700 font-medium">{plan.description}</p>
+                      <h4 className="text-lg md:text-xl font-medium mb-3 text-gray-700">
+                        {plan.title}
+                      </h4>
                     </div>
                     
-                    <div className="mb-5 flex items-center text-wedding-gold">
-                      <Diamond className="h-5 w-5 mr-2 fill-wedding-gold text-wedding-gold" />
-                      <p className="font-semibold text-sm md:text-base">{plan.primaryBenefit}</p>
+                    <div className="flex flex-col mb-4">
+                      <div className={`bg-gradient-to-br ${plan.color} p-4 md:p-6 rounded-lg mb-5`}>
+                        <div className="flex flex-col mb-2">
+                          <div className="flex items-end">
+                            <span className="text-3xl md:text-4xl font-bold text-wedding-deep-purple">
+                              {billingCycle === 'annually' ? plan.annualPrice : plan.quarterlyPrice}
+                            </span>
+                            <span className="text-gray-600 ml-1 mb-1">/{billingCycle === 'annually' ? 'year' : 'quarter'}</span>
+                          </div>
+                          {billingCycle === 'quarterly' && (
+                            <div className="text-sm text-gray-600 mt-1">Annual: {plan.annualPrice}</div>
+                          )}
+                        </div>
+                        <p className="text-sm md:text-base text-gray-700 font-medium">{plan.description}</p>
+                      </div>
+                      
+                      <div className="mb-5 flex items-center text-wedding-gold">
+                        <Diamond className="h-5 w-5 mr-2 fill-wedding-gold text-wedding-gold" />
+                        <p className="font-semibold text-sm md:text-base">{plan.primaryBenefit}</p>
+                      </div>
+                      
+                      <div className="bg-wedding-light-purple/10 p-3 md:p-4 rounded-lg text-center mb-5 border border-wedding-light-purple/20">
+                        <p className="text-xs md:text-sm font-medium text-wedding-deep-purple">{plan.roi}</p>
+                      </div>
                     </div>
                     
-                    <div className="bg-wedding-light-purple/10 p-3 md:p-4 rounded-lg text-center mb-5 border border-wedding-light-purple/20">
-                      <p className="text-xs md:text-sm font-medium text-wedding-deep-purple">{plan.roi}</p>
+                    <div className="mb-6 md:mb-8 space-y-3 flex-grow">
+                      {plan.features.map((feature, i) => (
+                        <div key={i} className="flex items-start">
+                          <Check className="h-4 md:h-5 w-4 md:w-5 text-green-500 mr-2 md:mr-3 mt-0.5 flex-shrink-0" />
+                          <span className="text-xs md:text-sm">{feature}</span>
+                        </div>
+                      ))}
+                      
+                      {plan.missingFeatures.map((feature, i) => (
+                        <div key={i} className="flex items-start text-gray-400">
+                          <Lock className="h-4 md:h-5 w-4 md:w-5 text-gray-300 mr-2 md:mr-3 mt-0.5 flex-shrink-0" />
+                          <span className="text-xs md:text-sm">{feature}</span>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                  
-                  <div className="mb-6 md:mb-8 space-y-3">
-                    {plan.features.map((feature, i) => (
-                      <div key={i} className="flex items-start">
-                        <Check className="h-4 md:h-5 w-4 md:w-5 text-green-500 mr-2 md:mr-3 mt-0.5 flex-shrink-0" />
-                        <span className="text-xs md:text-sm">{feature}</span>
-                      </div>
-                    ))}
                     
-                    {plan.missingFeatures.map((feature, i) => (
-                      <div key={i} className="flex items-start text-gray-400">
-                        <Lock className="h-4 md:h-5 w-4 md:w-5 text-gray-300 mr-2 md:mr-3 mt-0.5 flex-shrink-0" />
-                        <span className="text-xs md:text-sm">{feature}</span>
-                      </div>
-                    ))}
+                    <Button 
+                      className={`w-full font-semibold text-sm tracking-wider mt-auto ${
+                        plan.featured 
+                          ? 'gold-button shadow-md py-5 md:py-6'
+                          : 'bg-wedding-deep-purple text-white hover:bg-wedding-purple py-5 md:py-6'
+                      }`}
+                    >
+                      {plan.featured ? 'APPLY NOW — BEST VALUE' : 'APPLY NOW'}
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
                   </div>
-                  
-                  <Button 
-                    className={`w-full font-semibold tracking-wider ${
-                      plan.featured 
-                        ? 'gold-button shadow-xl flex items-center justify-center gap-2 py-5 md:py-7'
-                        : 'bg-wedding-deep-purple text-white hover:bg-wedding-purple flex items-center justify-center gap-2 py-5 md:py-7'
-                    }`}
-                  >
-                    {plan.featured ? 'APPLY NOW — RECOMMENDED' : 'APPLY NOW'}
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              venuePricingTables.map((plan, index) => (
+                <div 
+                  key={index} 
+                  className={`rounded-2xl overflow-hidden relative transition-all duration-300 ${
+                    plan.featured 
+                      ? 'border-2 border-wedding-deep-purple shadow-2xl md:scale-105 md:z-10 col-span-1 md:col-span-2' 
+                      : 'border border-gray-200 shadow-xl hover:shadow-2xl hover:scale-102 hover:z-10'
+                  }`}
+                >
+                  {plan.featured && (
+                    <div className="bg-wedding-deep-purple text-white py-2 text-center font-semibold tracking-wider flex items-center justify-center gap-2">
+                      <Diamond className="h-4 w-4 fill-wedding-gold text-wedding-gold" />
+                      PREMIUM VENUE SOLUTION
+                      <Diamond className="h-4 w-4 fill-wedding-gold text-wedding-gold" />
+                    </div>
+                  )}
+                  
+                  <div className="p-6 md:p-8 bg-white h-full flex flex-col">
+                    <div className="mb-6">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-xl md:text-2xl font-bold text-wedding-deep-purple">
+                          {plan.name}
+                        </h3>
+                        <div className={`bg-gradient-to-r ${plan.color} p-1.5 rounded-full`}>
+                          <Star className="h-5 w-5 fill-wedding-gold text-wedding-gold" />
+                        </div>
+                      </div>
+                      <h4 className="text-lg md:text-xl font-medium mb-3 text-gray-700">
+                        {plan.title}
+                      </h4>
+                    </div>
+                    
+                    <div className="flex flex-col mb-4">
+                      <div className={`bg-gradient-to-br ${plan.color} p-4 md:p-6 rounded-lg mb-5`}>
+                        <div className="flex flex-col mb-2">
+                          <div className="flex items-end">
+                            <span className="text-3xl md:text-4xl font-bold text-wedding-deep-purple">
+                              {billingCycle === 'annually' ? plan.annualPrice : plan.quarterlyPrice}
+                            </span>
+                            <span className="text-gray-600 ml-1 mb-1">/{billingCycle === 'annually' ? 'year' : 'quarter'}</span>
+                          </div>
+                          {billingCycle === 'quarterly' && (
+                            <div className="text-sm text-gray-600 mt-1">Annual: {plan.annualPrice}</div>
+                          )}
+                        </div>
+                        <p className="text-sm md:text-base text-gray-700 font-medium">{plan.description}</p>
+                      </div>
+                      
+                      <div className="mb-5 flex items-center text-wedding-gold">
+                        <Diamond className="h-5 w-5 mr-2 fill-wedding-gold text-wedding-gold" />
+                        <p className="font-semibold text-sm md:text-base">{plan.primaryBenefit}</p>
+                      </div>
+                      
+                      <div className="bg-wedding-light-purple/10 p-3 md:p-4 rounded-lg text-center mb-5 border border-wedding-light-purple/20">
+                        <p className="text-xs md:text-sm font-medium text-wedding-deep-purple">{plan.roi}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-6 md:mb-8 space-y-3 flex-grow">
+                      {plan.features.map((feature, i) => (
+                        <div key={i} className="flex items-start">
+                          <Check className="h-4 md:h-5 w-4 md:w-5 text-green-500 mr-2 md:mr-3 mt-0.5 flex-shrink-0" />
+                          <span className="text-xs md:text-sm">{feature}</span>
+                        </div>
+                      ))}
+                      
+                      {plan.missingFeatures.map((feature, i) => (
+                        <div key={i} className="flex items-start text-gray-400">
+                          <Lock className="h-4 md:h-5 w-4 md:w-5 text-gray-300 mr-2 md:mr-3 mt-0.5 flex-shrink-0" />
+                          <span className="text-xs md:text-sm">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <Button 
+                      className={`w-full font-semibold text-sm tracking-wider mt-auto ${
+                        plan.featured 
+                          ? 'gold-button shadow-md py-5 md:py-6'
+                          : 'bg-wedding-deep-purple text-white hover:bg-wedding-purple py-5 md:py-6'
+                      }`}
+                    >
+                      {plan.featured ? 'APPLY NOW — PREMIUM CHOICE' : 'APPLY NOW'}
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
         
