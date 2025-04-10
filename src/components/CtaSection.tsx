@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Diamond, Star } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const advantages = [
   {
@@ -23,6 +24,26 @@ const advantages = [
 ];
 
 const CtaSection = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const handleScrollToPricing = () => {
+    const pricingSection = document.getElementById('pricing-section');
+    if (pricingSection) {
+      pricingSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      navigate('/pricing');
+    }
+  };
+  
+  const handleExplorePackages = () => {
+    if (location.pathname === '/') {
+      handleScrollToPricing();
+    } else {
+      navigate('/pricing');
+    }
+  };
+  
   return (
     <div className="relative py-28 overflow-hidden">
       {/* Background with overlay */}
@@ -71,11 +92,18 @@ const CtaSection = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-5 justify-center">
-            <Button className="gold-button text-lg px-10 py-7 rounded-md flex items-center gap-3 group hover:scale-105 transition-all duration-300 shadow-[0_0_15px_rgba(212,175,55,0.5)]">
+            <Button 
+              className="gold-button text-lg px-10 py-7 rounded-md flex items-center gap-3 group hover:scale-105 transition-all duration-300 shadow-[0_0_15px_rgba(212,175,55,0.5)]"
+              onClick={handleScrollToPricing}
+            >
               <span className="font-semibold tracking-wider">BECOME A WEDDED PARTNER</span>
               <ArrowRight className="transition-transform duration-300 group-hover:translate-x-1" size={20} />
             </Button>
-            <Button variant="outline" className="bg-transparent border-2 border-white text-white hover:bg-white/10 text-lg px-10 py-7 rounded-md font-medium transition-all duration-300">
+            <Button 
+              variant="outline" 
+              className="bg-transparent border-2 border-white text-white hover:bg-white/10 text-lg px-10 py-7 rounded-md font-medium transition-all duration-300"
+              onClick={handleExplorePackages}
+            >
               EXPLORE PACKAGES
             </Button>
           </div>

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import PricingTables from '@/components/PricingTables';
@@ -10,7 +10,7 @@ const Pricing = () => {
   const [searchParams] = useSearchParams();
   const canceled = searchParams.get('canceled');
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (canceled === 'true') {
       toast({
         title: "Checkout Canceled",
@@ -19,6 +19,21 @@ const Pricing = () => {
       });
     }
   }, [canceled]);
+
+  const scrollToPricing = () => {
+    const pricingSection = document.getElementById('pricing-section');
+    if (pricingSection) {
+      pricingSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  useEffect(() => {
+    // Scroll to pricing tables if we're arriving from another page
+    const fromOtherPage = searchParams.get('scroll') === 'true';
+    if (fromOtherPage) {
+      setTimeout(scrollToPricing, 100);
+    }
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-white">

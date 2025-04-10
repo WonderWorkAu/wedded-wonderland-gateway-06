@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Check, X, ArrowRight, Star, Diamond, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -235,7 +236,7 @@ const PricingTables = () => {
   };
 
   return (
-    <div className="section-padding bg-gradient-to-b from-white to-wedding-cream/30 px-4 md:px-0">
+    <div id="pricing-section" className="section-padding bg-gradient-to-b from-white to-wedding-cream/30 px-4 md:px-0">
       <div className="container mx-auto">
         <div className="text-center mb-12 md:mb-16">
           <Badge className="mb-4 px-3 py-1 bg-wedding-deep-purple/10 text-wedding-deep-purple border-wedding-deep-purple/30 backdrop-blur-sm">

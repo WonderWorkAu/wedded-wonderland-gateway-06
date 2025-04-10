@@ -1,11 +1,21 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  
+  const handleScrollToPricing = () => {
+    const pricingSection = document.getElementById('pricing-section');
+    if (pricingSection) {
+      pricingSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      navigate('/pricing');
+    }
+  };
   
   return (
     <div className="relative min-h-screen flex items-center overflow-hidden">
@@ -38,7 +48,10 @@ const HeroSection = () => {
             </p>
           </div>
           
-          <Button className="gold-button text-base md:text-lg px-8 md:px-10 py-6 md:py-7 rounded-md flex items-center gap-3 group hover:scale-105 transition-all duration-300 shadow-[0_0_15px_rgba(212,175,55,0.5)]">
+          <Button 
+            className="gold-button text-base md:text-lg px-8 md:px-10 py-6 md:py-7 rounded-md flex items-center gap-3 group hover:scale-105 transition-all duration-300 shadow-[0_0_15px_rgba(212,175,55,0.5)]"
+            onClick={handleScrollToPricing}
+          >
             <span className="font-semibold">BECOME A WEDDED PARTNER</span>
             <ArrowRight className="transition-transform duration-300 group-hover:translate-x-1" size={20} />
           </Button>
