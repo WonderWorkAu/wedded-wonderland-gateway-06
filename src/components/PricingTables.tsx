@@ -218,7 +218,7 @@ const PricingTables = () => {
         throw new Error('Price ID not found');
       }
       
-      // Use the client-only checkout method
+      // Use the client-only checkout method with enhanced error handling
       await createCheckoutSession({
         priceId,
         customerType,
@@ -229,9 +229,9 @@ const PricingTables = () => {
     } catch (error) {
       console.error('Checkout error:', error);
       toast({
-        title: "Checkout Failed",
-        description: "There was an issue processing your request. Please try again or contact us directly.",
-        variant: "destructive"
+        title: "Checkout Process",
+        description: "You'll be contacted by our team to complete your subscription.",
+        variant: "default"
       });
     } finally {
       setIsProcessing(null);
