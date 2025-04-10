@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Check, X, ArrowRight, Star, Diamond, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -232,6 +231,15 @@ const PricingTables = () => {
       });
     } finally {
       setIsProcessing(null);
+    }
+  };
+
+  const handleScrollToPricing = () => {
+    const pricingSection = document.getElementById('pricing-section');
+    if (pricingSection) {
+      pricingSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      navigate('/pricing?scroll=true');
     }
   };
 
@@ -595,7 +603,15 @@ const PricingTables = () => {
         )}
         
         <div className="mt-10 md:mt-12 text-center">
-          <p className="text-xs md:text-sm text-wedding-deep-purple/80 max-w-xl mx-auto">
+          <Button 
+            className="gold-button text-base md:text-lg px-8 md:px-10 py-6 md:py-7 rounded-md flex items-center gap-3 group hover:scale-105 transition-all duration-300 shadow-[0_0_15px_rgba(212,175,55,0.5)]"
+            onClick={handleScrollToPricing}
+          >
+            <span className="font-semibold">EXPLORE OUR PRICING</span>
+            <ArrowRight className="transition-transform duration-300 group-hover:translate-x-1" size={20} />
+          </Button>
+          
+          <p className="mt-6 text-xs md:text-sm text-wedding-deep-purple/80 max-w-xl mx-auto">
             All packages include a risk-free 30-day satisfaction guarantee. 
             Join the thousands of wedding professionals who have transformed their business through the Wedded Network.
           </p>
