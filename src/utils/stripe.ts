@@ -5,6 +5,11 @@ import { toast } from '@/components/ui/use-toast';
 // Initialize Stripe with your publishable key
 const stripePromise = loadStripe('pk_live_6SIAPyVk7F1B8fDhK2cvmzG5');
 
+// Get the current domain - works in development and production
+const getDomain = () => {
+  return window.location.origin;
+};
+
 interface CreateCheckoutSessionParams {
   priceId: string;
   customerType: 'vendor' | 'venue';
@@ -23,6 +28,9 @@ export async function createCheckoutSession({
     const stripe = await stripePromise;
     if (!stripe) throw new Error('Stripe failed to initialize');
     
+    // Get current domain for success and cancel URLs
+    const domain = getDomain();
+    
     try {
       // Redirect to Stripe Checkout using priceId directly
       const { error } = await stripe.redirectToCheckout({
@@ -30,8 +38,8 @@ export async function createCheckoutSession({
           { price: priceId, quantity: 1 }
         ],
         mode: 'subscription',
-        successUrl: `${window.location.origin}/success?plan=${planName}&type=${customerType}`,
-        cancelUrl: `${window.location.origin}/pricing?canceled=true`,
+        successUrl: `${domain}/success?plan=${encodeURIComponent(planName)}&type=${customerType}`,
+        cancelUrl: `${domain}/pricing?canceled=true`,
       });
       
       if (error) {
@@ -76,8 +84,9 @@ export async function createCheckoutSession({
 // Fallback implementation that directly opens a new tab to your contact page
 export async function handleCheckoutFallback(planName: string) {
   try {
-    // This is a fallback method that simply opens your contact page
-    const url = `https://yourcompany.com/contact?plan=${planName}`;
+    // This is a fallback method that opens your contact page
+    const domain = 'https://lp.weddedwonderland.com';
+    const url = `${domain}/contact?plan=${encodeURIComponent(planName)}`;
     window.open(url, '_blank');
     
     toast({
