@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -35,7 +35,7 @@
     --input: 0 0% 89.8%;
     --ring: 0 0% 0%;
 
-    --radius: 0.5rem;
+    --radius: 0rem;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 0 0% 0%;
@@ -86,10 +86,12 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Montserrat', sans-serif;
+    letter-spacing: 0.015em;
   }
 
   h1, h2, h3, h4, h5 {
     font-family: 'Cormorant Garamond', serif;
+    letter-spacing: 0.02em;
   }
 }
 
@@ -99,19 +101,19 @@
   }
   
   .shimmer {
-    @apply bg-gradient-to-r from-transparent via-white/20 to-transparent bg-[length:200%_100%] animate-shimmer;
+    @apply bg-gradient-to-r from-transparent via-wedding-medium-gray/10 to-transparent bg-[length:200%_100%] animate-shimmer;
   }
   
-  .gold-gradient {
-    @apply bg-gradient-to-r from-wedding-gold via-yellow-300 to-wedding-gold bg-clip-text text-transparent;
+  .bw-gradient {
+    @apply bg-gradient-to-r from-wedding-black via-wedding-dark-gray to-wedding-black bg-clip-text text-transparent;
   }
   
   .cta-button {
-    @apply bg-wedding-black text-white font-semibold py-3 px-6 rounded-md hover:bg-wedding-charcoal transition duration-300 shadow-lg;
+    @apply bg-wedding-black text-wedding-white font-semibold py-3 px-6 hover:bg-wedding-dark-gray transition duration-300;
   }
   
-  .gold-button {
-    @apply bg-wedding-black text-wedding-white font-semibold py-3 px-6 rounded-md hover:shadow-xl transition duration-300 shadow-lg;
+  .black-button {
+    @apply bg-wedding-black text-wedding-white font-semibold py-3 px-6 hover:bg-wedding-dark-gray transition duration-300;
   }
   
   .section-padding {
@@ -119,18 +121,18 @@
   }
   
   .value-badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors bg-wedding-light-gray text-wedding-black;
+    @apply inline-flex items-center rounded-none px-2.5 py-0.5 text-xs font-semibold transition-colors bg-wedding-light-gray text-wedding-black;
   }
   
   .benefit-card {
-    @apply bg-wedding-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-wedding-light-gray;
+    @apply bg-wedding-white rounded-none p-6 shadow-md hover:shadow-lg transition-all duration-300 border border-wedding-light-gray;
   }
   
   .testimonial-card {
-    @apply bg-wedding-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-none;
+    @apply bg-wedding-white rounded-none p-6 shadow-md hover:shadow-lg transition-all duration-300 border-wedding-light-gray border;
   }
   
   .feature-icon-wrapper {
-    @apply bg-wedding-light-gray p-4 rounded-full mb-4 text-wedding-black inline-flex items-center justify-center;
+    @apply bg-wedding-light-gray p-4 rounded-none mb-4 text-wedding-black inline-flex items-center justify-center;
   }
 }

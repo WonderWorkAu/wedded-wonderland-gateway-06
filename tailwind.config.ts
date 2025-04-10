@@ -67,13 +67,10 @@ export default {
 					'black': '#000000',
 					'white': '#FFFFFF',
 					'off-white': '#F8F8F8',
-					'light-gray': '#E0E0E0',
-					'medium-gray': '#BBBBBB',
-					'dark-gray': '#555555',
-					'gold': '#D4AF37',
-					'silver': '#C0C0C0',
-					'cream': '#FFFDF6',
-					'charcoal': '#333333'
+					'light-gray': '#E5E5E5',
+					'medium-gray': '#999999',
+					'dark-gray': '#333333',
+					'charcoal': '#222222'
 				}
 			},
 			borderRadius: {
@@ -113,7 +110,7 @@ export default {
 				'shimmer': 'shimmer 2s linear infinite'
 			},
 			backgroundImage: {
-				'gradient-gold': 'linear-gradient(45deg, #D4AF37 0%, #F8F4E3 50%, #D4AF37 100%)'
+				'gradient-bw': 'linear-gradient(45deg, #000000 0%, #333333 50%, #000000 100%)'
 			}
 		}
 	},
