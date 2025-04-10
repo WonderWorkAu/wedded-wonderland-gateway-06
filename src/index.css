@@ -1,3 +1,6 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,7 +16,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 262 60% 52%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -35,19 +38,12 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -97,5 +93,36 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-family: 'Cormorant Garamond', serif;
+  }
+}
+
+@layer components {
+  .wedded-title {
+    @apply font-['Cormorant_Garamond'] font-bold text-wedding-deep-purple;
+  }
+  
+  .shimmer {
+    @apply bg-gradient-to-r from-transparent via-white/20 to-transparent bg-[length:200%_100%] animate-shimmer;
+  }
+  
+  .gold-gradient {
+    @apply bg-gradient-gold bg-clip-text text-transparent;
+  }
+  
+  .cta-button {
+    @apply bg-wedding-deep-purple text-white font-semibold py-3 px-6 rounded-md hover:bg-wedding-purple transition duration-300 shadow-lg;
+  }
+  
+  .gold-button {
+    @apply bg-gradient-gold text-wedding-charcoal font-semibold py-3 px-6 rounded-md hover:shadow-xl transition duration-300 shadow-lg;
+  }
+  
+  .section-padding {
+    @apply py-16 md:py-24;
   }
 }
