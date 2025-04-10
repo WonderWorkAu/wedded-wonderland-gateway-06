@@ -22,5 +22,12 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    { 
+      "source": "/contact",
+      "destination": "https://weddedwonderland.com/contact",
+      "permanent": false 
+    }
   ]
 }

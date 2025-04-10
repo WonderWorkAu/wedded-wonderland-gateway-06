@@ -10,6 +10,12 @@ const getDomain = () => {
   return window.location.origin;
 };
 
+// Check if we're on the production domain
+const isProductionDomain = () => {
+  const domain = window.location.hostname;
+  return domain === 'lp.weddedwonderland.com';
+};
+
 interface CreateCheckoutSessionParams {
   priceId: string;
   customerType: 'vendor' | 'venue';
@@ -47,22 +53,31 @@ export async function createCheckoutSession({
         throw error;
       }
     } catch (redirectError) {
-      // If there's a domain configuration error, use the alternative checkout
       console.error('Redirect to checkout failed:', redirectError);
       
       // Check if it's a domain configuration error
       if (redirectError.message && redirectError.message.includes('domain')) {
-        toast({
-          title: "Development Environment Detected",
-          description: "Using direct checkout link instead. In production, this would be a seamless redirect.",
-          duration: 5000,
-        });
-        
-        // For development environments, open Stripe checkout in a new tab
-        // This uses Stripe's hosted checkout page which doesn't have domain restrictions
-        const checkoutUrl = `https://checkout.stripe.com/pay/${priceId}`;
-        window.open(checkoutUrl, '_blank');
-        return;
+        // If we're on production domain but still get this error, use alternative checkout
+        if (isProductionDomain()) {
+          console.info('Production domain detected but Stripe still reports domain configuration issue. Using fallback checkout.');
+          
+          // For production environment with domain issues, use direct checkout link
+          const checkoutUrl = `https://checkout.stripe.com/pay/${priceId}`;
+          window.open(checkoutUrl, '_blank');
+          return;
+        } else {
+          // This is a genuine development environment
+          toast({
+            title: "Development Environment Detected",
+            description: "Using direct checkout link instead. In production, this would be a seamless redirect.",
+            duration: 5000,
+          });
+          
+          // Open Stripe checkout in a new tab
+          const checkoutUrl = `https://checkout.stripe.com/pay/${priceId}`;
+          window.open(checkoutUrl, '_blank');
+          return;
+        }
       }
       
       throw redirectError; // Rethrow if it's not a domain error
