@@ -14,17 +14,16 @@ import { toast } from '@/components/ui/use-toast';
 type CustomerType = 'vendor' | 'venue';
 type BillingCycle = 'annually' | 'quarterly';
 
-// Pricing details with Stripe integration
 const PRICING_CONFIG = {
   vendor: {
     Directory: {
       quarterly: {
         price: "$500",
-        stripePriceId: "price_placeholder_directory_quarterly"
+        stripePriceId: "price_1RCCYhIA2rpN54RV3wpASNDU"  // Updated Directory quarterly
       },
       annually: {
         price: "$1,500",
-        stripePriceId: "price_placeholder_directory_annually"
+        stripePriceId: "price_1RCCYgIA2rpN54RV2EJWKd5R"  // Updated Directory annual
       }
     },
     Network: {
@@ -206,19 +205,16 @@ const PricingTables = () => {
   
   const pricingTables = customerType === 'vendor' ? vendorPricingTables : venuePricingTables;
 
-  // Handle checkout
   const handleCheckout = async (plan: string) => {
     try {
       setIsProcessing(plan);
       
-      // Get the appropriate price ID from our config
       const priceId = PRICING_CONFIG[customerType]?.[plan]?.[billingCycle]?.stripePriceId;
       
       if (!priceId) {
         throw new Error('Price ID not found');
       }
       
-      // Use the client-only checkout method with enhanced error handling
       await createCheckoutSession({
         priceId,
         customerType,
@@ -251,7 +247,6 @@ const PricingTables = () => {
             Select the perfect partnership level that aligns with your vision and transforms your wedding business on the global stage.
           </p>
           
-          {/* Customer Type Selector */}
           <div className="flex flex-col items-center justify-center mb-8">
             <div className="flex items-center gap-3 mb-4 bg-white p-3 rounded-full shadow-sm border border-gray-200 max-w-xs mx-auto">
               <div className="flex items-center space-x-2 w-full justify-between">
@@ -271,7 +266,6 @@ const PricingTables = () => {
             </div>
           </div>
           
-          {/* Billing Cycle Toggle */}
           <div className="flex flex-col items-center justify-center mb-10">
             <div className="flex items-center space-x-2 bg-white p-1 rounded-full border border-gray-200 shadow-sm">
               <ToggleGroup 
