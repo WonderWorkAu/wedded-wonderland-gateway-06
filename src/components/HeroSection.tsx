@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Star } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate } from 'react-router-dom';
+import { useCMSStore } from '@/store/cmsStore';
 
 const HeroSection = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
+  const { heroContent } = useCMSStore();
   
   const handleScrollToPricing = () => {
     const pricingSection = document.getElementById('pricing-section');
@@ -35,17 +37,26 @@ const HeroSection = () => {
           </div>
           
           <h1 className="text-3xl md:text-6xl lg:text-7xl font-light text-wedding-black mb-6 md:mb-8 leading-tight tracking-tight">
-            Your Craft Is <span className="bw-gradient font-semibold">World-Class.</span> {isMobile ? '' : <br />}
-            Your <span className="bw-gradient font-semibold">Visibility</span> Should Be Too.
+            {heroContent.mainHeading?.split(' ').map((word, index, array) => {
+              // Apply styling to "World-Class" and "Visibility"
+              if (word === "World-Class." || word === "Visibility") {
+                return <span key={index} className="bw-gradient font-semibold">{word} </span>;
+              }
+              // Add line break after the first sentence on desktop
+              else if (word === "Too." && !isMobile) {
+                return <span key={index}>{word}<br /></span>;
+              }
+              return <span key={index}>{word} </span>;
+            })}
           </h1>
           
           <p className="text-lg md:text-2xl text-wedding-dark-gray mb-8 max-w-3xl">
-            Join the exclusive network reaching <span className="text-wedding-black font-semibold">10M+ monthly couples</span> across <span className="text-wedding-black font-semibold">54+ countries</span> who are actively searching for exceptional wedding professionals like you.
+            {heroContent.subHeading}
           </p>
           
           <div className="mb-10 md:mb-12 py-4 md:py-6 px-6 md:px-8 bg-wedding-black rounded-none">
             <p className="text-lg md:text-2xl italic text-wedding-white font-light">
-              "You've mastered your craft. Now it's time to <span className="text-wedding-white font-normal not-italic">master your market.</span>"
+              "{heroContent.quote}"
             </p>
           </div>
           
@@ -53,12 +64,12 @@ const HeroSection = () => {
             className="black-button text-base md:text-lg px-8 md:px-10 py-6 md:py-7 rounded-none flex items-center gap-3 group hover:scale-105 transition-all duration-300 uppercase tracking-widest"
             onClick={handleScrollToPricing}
           >
-            <span className="font-semibold">BECOME A WEDDED PARTNER</span>
+            <span className="font-semibold">{heroContent.ctaText}</span>
             <ArrowRight className="transition-transform duration-300 group-hover:translate-x-1" size={20} />
           </Button>
           
           <p className="mt-6 text-xs md:text-sm text-wedding-dark-gray italic">
-            *Limited memberships available for 2025
+            {heroContent.footerText}
           </p>
         </div>
       </div>
