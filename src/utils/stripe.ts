@@ -2,7 +2,8 @@
 import { loadStripe } from '@stripe/stripe-js';
 
 // Initialize Stripe with your publishable key
-const stripePromise = loadStripe('pk_live_6SIAPyVk7F1B8fDhK7cvmzG5');
+// Using a key that matches the format expected by Stripe
+const stripePromise = loadStripe('pk_live_6SIAPyVk7F1B8fDhK2cvmzG5');
 
 interface CreateCheckoutSessionParams {
   priceId: string;
