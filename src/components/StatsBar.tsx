@@ -4,10 +4,10 @@ import { Check } from 'lucide-react';
 
 const StatsBar = () => {
   return (
-    <div className="bg-gradient-to-r from-wedding-deep-purple to-wedding-deep-purple/90 text-white py-12">
+    <div className="bg-wedding-black text-white py-12">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
-          <h3 className="text-xl md:text-2xl font-medium text-wedding-cream mb-2">Recognized and Trusted By</h3>
+          <h3 className="text-xl md:text-2xl font-medium text-wedding-white mb-2">Recognized and Trusted By</h3>
           <div className="w-20 h-0.5 bg-wedding-gold mx-auto mb-8"></div>
           
           <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 lg:gap-16">

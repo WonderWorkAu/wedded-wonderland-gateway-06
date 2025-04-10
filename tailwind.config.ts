@@ -64,12 +64,15 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				wedding: {
-					'purple': '#7E69AB',
-					'deep-purple': '#6E59A5',
-					'light-purple': '#D6BCFA',
+					'black': '#000000',
+					'white': '#FFFFFF',
+					'off-white': '#F8F8F8',
+					'light-gray': '#E0E0E0',
+					'medium-gray': '#BBBBBB',
+					'dark-gray': '#555555',
 					'gold': '#D4AF37',
-					'cream': '#F8F4E3',
-					'blush': '#F3D3CF',
+					'silver': '#C0C0C0',
+					'cream': '#FFFDF6',
 					'charcoal': '#333333'
 				}
 			},
