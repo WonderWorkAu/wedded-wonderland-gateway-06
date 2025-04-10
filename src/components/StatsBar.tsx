@@ -4,7 +4,7 @@ import { Check } from 'lucide-react';
 
 const StatsBar = () => {
   return (
-    <div className="bg-gradient-to-r from-wedding-deep-purple to-wedding-deep-purple/90 text-white py-12">
+    <div className="bg-gradient-to-r from-[#111111] to-black text-white py-12">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
           <h3 className="text-xl md:text-2xl font-medium text-wedding-cream mb-2">Recognized and Trusted By</h3>
@@ -23,7 +23,7 @@ const StatsBar = () => {
           <div className="flex flex-col items-center p-6 backdrop-blur-sm bg-white/5 rounded-xl border border-white/10">
             <h3 className="text-4xl md:text-6xl font-bold gold-gradient mb-2">54+</h3>
             <p className="text-base md:text-lg font-medium mt-2 text-white/90">Countries With Active Members</p>
-            <div className="mt-3 flex items-center text-sm text-white/70">
+            <div className="mt-3 flex items-center text-sm text-white">
               <Check className="h-4 w-4 text-wedding-gold mr-1" />
               <span>Global Network Access</span>
             </div>
@@ -32,7 +32,7 @@ const StatsBar = () => {
           <div className="flex flex-col items-center p-6 backdrop-blur-sm bg-white/5 rounded-xl border border-white/10">
             <h3 className="text-4xl md:text-6xl font-bold gold-gradient mb-2">10M+</h3>
             <p className="text-base md:text-lg font-medium mt-2 text-white/90">Monthly Audience Reach</p>
-            <div className="mt-3 flex items-center text-sm text-white/70">
+            <div className="mt-3 flex items-center text-sm text-white">
               <Check className="h-4 w-4 text-wedding-gold mr-1" />
               <span>High-Intent Couples</span>
             </div>
@@ -41,7 +41,7 @@ const StatsBar = () => {
           <div className="flex flex-col items-center p-6 backdrop-blur-sm bg-white/5 rounded-xl border border-white/10">
             <h3 className="text-4xl md:text-6xl font-bold gold-gradient mb-2">3M+</h3>
             <p className="text-base md:text-lg font-medium mt-2 text-white/90">Social Media Following</p>
-            <div className="mt-3 flex items-center text-sm text-white/70">
+            <div className="mt-3 flex items-center text-sm text-white">
               <Check className="h-4 w-4 text-wedding-gold mr-1" />
               <span>Multi-Channel Visibility</span>
             </div>

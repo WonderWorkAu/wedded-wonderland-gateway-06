@@ -53,10 +53,10 @@ const testimonials = [
 
 const TestimonialsSection = () => {
   return (
-    <div className="section-padding bg-gradient-to-b from-wedding-cream/20 to-white">
+    <div className="section-padding bg-gradient-to-b from-black to-[#111111]">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <div className="inline-block py-1 px-3 rounded-full bg-wedding-gold/10 text-wedding-deep-purple text-sm font-medium mb-4 border border-wedding-gold/30">
+          <div className="inline-block py-1 px-3 rounded-full bg-wedding-gold/20 text-wedding-gold text-sm font-medium mb-4 border border-wedding-gold/30">
             Success Transformations
           </div>
           <h2 className="wedded-title text-4xl md:text-5xl mb-6">
@@ -64,7 +64,7 @@ const TestimonialsSection = () => {
             <span className="gold-gradient">Success Stories.</span>
           </h2>
           <div className="w-24 h-1 bg-wedding-gold mx-auto mb-8"></div>
-          <p className="text-lg text-gray-700 max-w-3xl mx-auto">
+          <p className="text-lg text-gray-300 max-w-3xl mx-auto">
             Join the elite community of professionals experiencing extraordinary growth, connections, and recognition with the Wedded Network
           </p>
         </div>
@@ -72,7 +72,7 @@ const TestimonialsSection = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
             <Card key={index} className="testimonial-card overflow-hidden group hover:shadow-2xl transition-all duration-300">
-              <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-wedding-gold via-wedding-purple to-wedding-deep-purple"></div>
+              <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-wedding-gold via-gray-500 to-wedding-gold"></div>
               <CardContent className="p-8">
                 <div className="flex justify-between items-start mb-6">
                   <Quote className="h-10 w-10 text-wedding-gold" />
@@ -82,20 +82,20 @@ const TestimonialsSection = () => {
                     ))}
                   </div>
                 </div>
-                <p className="text-gray-700 italic mb-6 text-lg leading-relaxed line-clamp-6">"{testimonial.quote}"</p>
+                <p className="text-gray-300 italic mb-6 text-lg leading-relaxed line-clamp-6">"{testimonial.quote}"</p>
                 
-                <div className="mt-6 mb-5 bg-wedding-light-purple/5 p-4 rounded-lg border border-wedding-light-purple/10 transform group-hover:scale-105 transition-transform duration-300">
-                  <p className="text-sm font-medium text-wedding-deep-purple flex items-center">
+                <div className="mt-6 mb-5 bg-black/50 p-4 rounded-lg border border-white/10 transform group-hover:scale-105 transition-transform duration-300">
+                  <p className="text-sm font-medium text-wedding-cream flex items-center">
                     <span className="text-wedding-gold mr-2">→</span> 
                     {testimonial.transform}
                   </p>
                 </div>
                 
                 <div className="mt-4">
-                  <p className="font-semibold text-wedding-deep-purple text-lg">{testimonial.name}</p>
-                  <p className="text-sm text-gray-500">{testimonial.role}</p>
+                  <p className="font-semibold text-wedding-cream text-lg">{testimonial.name}</p>
+                  <p className="text-sm text-gray-400">{testimonial.role}</p>
                 </div>
-                <div className="mt-3 inline-block py-1 px-3 bg-wedding-light-purple/10 rounded-full text-xs font-medium text-wedding-deep-purple border border-wedding-light-purple/20">
+                <div className="mt-3 inline-block py-1 px-3 bg-wedding-light-purple/20 rounded-full text-xs font-medium text-wedding-cream border border-white/10">
                   {testimonial.highlight}
                 </div>
               </CardContent>
@@ -104,13 +104,13 @@ const TestimonialsSection = () => {
         </div>
         
         <div className="mt-16 text-center">
-          <p className="text-lg font-medium text-wedding-deep-purple mb-4">Trusted by luxury brands worldwide, including:</p>
+          <p className="text-lg font-medium text-wedding-cream mb-4">Trusted by luxury brands worldwide, including:</p>
           <div className="flex flex-wrap justify-center items-center gap-10 mt-4">
-            <div className="text-2xl font-serif italic text-wedding-deep-purple/90 flex flex-col items-center">
+            <div className="text-2xl font-serif italic text-wedding-gold flex flex-col items-center">
               <span className="text-3xl mb-1">Laduree</span>
               <div className="w-12 h-0.5 bg-wedding-gold"></div>
             </div>
-            <div className="text-2xl font-serif italic text-wedding-deep-purple/90 flex flex-col items-center">
+            <div className="text-2xl font-serif italic text-wedding-gold flex flex-col items-center">
               <span className="text-3xl mb-1">Moet & Chandon</span>
               <div className="w-12 h-0.5 bg-wedding-gold"></div>
             </div>
