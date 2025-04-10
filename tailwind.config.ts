@@ -20,9 +20,9 @@ export default {
     },
     extend: {
       colors: {
-        border: '#333333',
-        input: '#333333',
-        ring: '#222222',
+        border: '#000000',
+        input: '#000000',
+        ring: '#000000',
         background: '#000000',
         foreground: '#FFFFFF',
         primary: {
@@ -30,42 +30,33 @@ export default {
           foreground: '#FFFFFF'
         },
         secondary: {
-          DEFAULT: '#222222',
+          DEFAULT: '#333333',
           foreground: '#FFFFFF'
         },
         muted: {
-          DEFAULT: '#444444',
-          foreground: '#FFFFFF'
-        },
-        accent: {
           DEFAULT: '#666666',
           foreground: '#FFFFFF'
         },
+        accent: {
+          DEFAULT: '#999999',
+          foreground: '#000000'
+        },
         card: {
-          DEFAULT: '#111111',
+          DEFAULT: '#000000',
           foreground: '#FFFFFF'
         },
         wedding: {
-          'purple': '#333333',
-          'deep-purple': '#222222',
-          'light-purple': '#555555',
-          'gold': '#D4AF37',
-          'cream': '#F5F5F5',
-          'blush': '#D8D8D8',
-          'charcoal': '#111111'
+          'purple': '#000000',
+          'deep-purple': '#000000',
+          'light-purple': '#333333',
+          'gold': '#FFFFFF',
+          'cream': '#CCCCCC',
+          'blush': '#AAAAAA',
+          'charcoal': '#000000'
         }
       },
       backgroundImage: {
-        'gradient-gold': 'linear-gradient(45deg, #8A7B3C 0%, #D4AF37 50%, #8A7B3C 100%)'
-      },
-      animation: {
-        "shimmer": "shimmer 2s linear infinite"
-      },
-      keyframes: {
-        "shimmer": {
-          "0%": { backgroundPosition: "200% 0" },
-          "100%": { backgroundPosition: "0 0" }
-        }
+        'gradient-gold': 'linear-gradient(45deg, #000000 0%, #FFFFFF 50%, #000000 100%)'
       }
     }
   },
