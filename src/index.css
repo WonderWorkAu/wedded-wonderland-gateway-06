@@ -111,7 +111,7 @@
   }
   
   .gold-gradient {
-    @apply bg-gradient-gold bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-wedding-gold via-yellow-300 to-wedding-gold bg-clip-text text-transparent;
   }
   
   .cta-button {
@@ -119,10 +119,26 @@
   }
   
   .gold-button {
-    @apply bg-gradient-gold text-wedding-charcoal font-semibold py-3 px-6 rounded-md hover:shadow-xl transition duration-300 shadow-lg;
+    @apply bg-gradient-to-r from-wedding-gold via-yellow-400 to-wedding-gold text-wedding-charcoal font-semibold py-3 px-6 rounded-md hover:shadow-xl transition duration-300 shadow-lg hover:from-wedding-gold hover:via-yellow-300 hover:to-wedding-gold;
   }
   
   .section-padding {
     @apply py-16 md:py-24;
+  }
+  
+  .value-badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors bg-wedding-purple/10 text-wedding-deep-purple;
+  }
+  
+  .benefit-card {
+    @apply bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100;
+  }
+  
+  .testimonial-card {
+    @apply bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-none;
+  }
+  
+  .feature-icon-wrapper {
+    @apply bg-wedding-light-purple/20 p-4 rounded-full mb-4 text-wedding-deep-purple inline-flex items-center justify-center;
   }
 }
