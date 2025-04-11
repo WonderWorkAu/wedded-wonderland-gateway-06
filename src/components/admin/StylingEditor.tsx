@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { useStylingStore } from '@/store/stylingStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -49,6 +50,11 @@ const StylingEditor = () => {
       title: "Global styles updated",
       description: "Your changes have been saved",
     });
+    
+    // Force a refresh of the page to see changes
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 1500);
   };
 
   const handleHeroSubmit = (e: React.FormEvent) => {
@@ -81,6 +87,16 @@ const StylingEditor = () => {
   // Font size options
   const fontSizes = [
     "xs", "sm", "base", "lg", "xl", "2xl", "3xl", "4xl", "5xl", "6xl", "7xl", "8xl", "9xl"
+  ];
+
+  // Dark color presets for overlays
+  const darkColorPresets = [
+    { label: "Black", value: "#000000" },
+    { label: "Dark Gray", value: "#222222" },
+    { label: "Dark Charcoal", value: "#333333" },
+    { label: "Dark Blue", value: "#1A1F2C" },
+    { label: "Dark Purple", value: "#221F26" },
+    { label: "Custom", value: "custom" }
   ];
 
   return (
@@ -151,6 +167,25 @@ const StylingEditor = () => {
               </div>
             </div>
             
+            <div>
+              <label className="block text-sm font-medium mb-2">Custom CSS</label>
+              <Textarea
+                value={globalFormData.customCSS}
+                onChange={(e) => handleGlobalChange('customCSS', e.target.value)}
+                className="h-48 font-mono text-sm rounded-none"
+                placeholder=":root {
+  --custom-color: #ff0000;
+}
+
+.custom-class {
+  background-color: var(--custom-color);
+}"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Add custom CSS rules here. They will be applied to the entire site.
+              </p>
+            </div>
+            
             <div className="pt-4">
               <Button 
                 type="submit"
@@ -180,6 +215,43 @@ const StylingEditor = () => {
               </div>
               
               <div>
+                <label className="block text-sm font-medium mb-2">Video Overlay Color</label>
+                <div className="flex gap-3">
+                  <Input
+                    type="color"
+                    value={heroFormData.backgroundVideoOverlayColor}
+                    onChange={(e) => handleHeroChange('backgroundVideoOverlayColor', e.target.value)}
+                    className="w-16 h-10 p-1 rounded-none"
+                  />
+                  <Input
+                    type="text"
+                    value={heroFormData.backgroundVideoOverlayColor}
+                    onChange={(e) => handleHeroChange('backgroundVideoOverlayColor', e.target.value)}
+                    className="rounded-none"
+                  />
+                </div>
+                <div className="mt-2">
+                  <Label className="text-xs mb-1 block">Presets:</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {darkColorPresets.map((preset) => (
+                      preset.value !== "custom" && (
+                        <button
+                          key={preset.value}
+                          type="button"
+                          className="w-6 h-6 border rounded-none hover:ring-2 ring-wedding-black"
+                          style={{ backgroundColor: preset.value }}
+                          onClick={() => handleHeroChange('backgroundVideoOverlayColor', preset.value)}
+                          title={preset.label}
+                        ></button>
+                      )
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
                 <label className="block text-sm font-medium mb-2">Background Image Opacity ({Math.round(heroFormData.backgroundImageOpacity * 100)}%)</label>
                 <Slider
                   value={[heroFormData.backgroundImageOpacity * 100]}
@@ -189,6 +261,41 @@ const StylingEditor = () => {
                   step={1}
                   className="py-4"
                 />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-2">Image Overlay Color</label>
+                <div className="flex gap-3">
+                  <Input
+                    type="color"
+                    value={heroFormData.backgroundImageOverlayColor}
+                    onChange={(e) => handleHeroChange('backgroundImageOverlayColor', e.target.value)}
+                    className="w-16 h-10 p-1 rounded-none"
+                  />
+                  <Input
+                    type="text"
+                    value={heroFormData.backgroundImageOverlayColor}
+                    onChange={(e) => handleHeroChange('backgroundImageOverlayColor', e.target.value)}
+                    className="rounded-none"
+                  />
+                </div>
+                <div className="mt-2">
+                  <Label className="text-xs mb-1 block">Presets:</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {darkColorPresets.map((preset) => (
+                      preset.value !== "custom" && (
+                        <button
+                          key={preset.value}
+                          type="button"
+                          className="w-6 h-6 border rounded-none hover:ring-2 ring-wedding-black"
+                          style={{ backgroundColor: preset.value }}
+                          onClick={() => handleHeroChange('backgroundImageOverlayColor', preset.value)}
+                          title={preset.label}
+                        ></button>
+                      )
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
             

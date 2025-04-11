@@ -48,16 +48,35 @@ const HeroSection = () => {
               <source src={heroContent.backgroundVideo} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
+            {/* Video overlay with color */}
+            <div 
+              className="absolute inset-0" 
+              style={{ 
+                backgroundColor: heroStyles.backgroundVideoOverlayColor,
+                opacity: heroStyles.backgroundVideoOpacity
+              }}
+            ></div>
           </div>
         )}
         
         {/* Background image as fallback or overlay */}
         {heroContent.backgroundImage && (
-          <div className="absolute inset-0 bg-cover bg-center bg-fixed"
-               style={{ 
-                 backgroundImage: `url('${heroContent.backgroundImage}')`,
-                 opacity: heroStyles.backgroundImageOpacity 
-               }}>
+          <div className="absolute inset-0">
+            <div 
+              className="absolute inset-0 bg-cover bg-center bg-fixed"
+              style={{ 
+                backgroundImage: `url('${heroContent.backgroundImage}')`,
+                opacity: heroStyles.backgroundImageOpacity 
+              }}
+            ></div>
+            {/* Image overlay with color */}
+            <div 
+              className="absolute inset-0" 
+              style={{ 
+                backgroundColor: heroStyles.backgroundImageOverlayColor,
+                opacity: heroStyles.backgroundImageOpacity
+              }}
+            ></div>
           </div>
         )}
       </div>

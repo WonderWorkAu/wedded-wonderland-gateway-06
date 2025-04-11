@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import HeroSection from '@/components/HeroSection';
 import StatsBar from '@/components/StatsBar';
 import BenefitsSection from '@/components/BenefitsSection';
@@ -19,6 +19,31 @@ const Index = () => {
   // Optional: Log stores for debugging
   console.log("CMS Store in Index:", cmsStore);
   console.log("Styling Store in Index:", stylingStore);
+  
+  // Apply custom CSS
+  useEffect(() => {
+    // Create a style element for custom CSS
+    const customCssElement = document.createElement('style');
+    customCssElement.id = 'wedded-custom-css';
+    customCssElement.textContent = stylingStore.globalStyles.customCSS;
+    
+    // Remove any existing custom CSS element
+    const existingCssElement = document.getElementById('wedded-custom-css');
+    if (existingCssElement) {
+      existingCssElement.remove();
+    }
+    
+    // Add the new custom CSS to the document head
+    document.head.appendChild(customCssElement);
+    
+    // Clean up on component unmount
+    return () => {
+      const cssElement = document.getElementById('wedded-custom-css');
+      if (cssElement) {
+        cssElement.remove();
+      }
+    };
+  }, [stylingStore.globalStyles.customCSS]);
 
   return (
     <div className="min-h-screen" style={{ fontFamily: stylingStore.globalStyles.fontFamily }}>
