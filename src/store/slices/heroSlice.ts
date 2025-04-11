@@ -22,10 +22,29 @@ export const createHeroSlice: StateCreator<HeroSlice> = (set) => ({
   heroContent: initialHeroContent,
   updateHeroContent: (content) => {
     console.log("Store updating hero content with:", content);
+    
+    // Make sure we have a complete hero content object by merging with current state
     set((state) => {
       const updatedContent = { ...state.heroContent, ...content };
-      // Sync with Supabase
-      updateContent('heroContent', updatedContent);
+      
+      // Verify we have the background video before sending to Supabase
+      console.log("Final hero content to be saved:", updatedContent);
+      
+      // Sync with Supabase - wrap in try/catch for better error handling
+      try {
+        updateContent('heroContent', updatedContent)
+          .then(success => {
+            if (!success) {
+              console.error("Failed to update hero content in Supabase");
+            }
+          })
+          .catch(error => {
+            console.error("Error updating hero content:", error);
+          });
+      } catch (error) {
+        console.error("Exception during hero content update:", error);
+      }
+      
       return { heroContent: updatedContent };
     });
   },

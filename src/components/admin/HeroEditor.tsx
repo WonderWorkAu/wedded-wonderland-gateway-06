@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,17 +14,32 @@ const HeroEditor = () => {
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({
-    mainHeading: heroContent.mainHeading || "Your Craft Is World-Class. Your Visibility Should Be Too.",
-    subHeading: heroContent.subHeading || "Join the exclusive network reaching 10M+ monthly couples across 54+ countries who are actively searching for exceptional wedding professionals like you.",
-    quote: heroContent.quote || "You've mastered your craft. Now it's time to master your market.",
-    ctaText: heroContent.ctaText || "BECOME A WEDDED PARTNER",
-    footerText: heroContent.footerText || "*Limited memberships available for 2025",
-    backgroundImage: heroContent.backgroundImage || "",
-    backgroundVideo: heroContent.backgroundVideo || "",
+    mainHeading: "",
+    subHeading: "",
+    quote: "",
+    ctaText: "",
+    footerText: "",
+    backgroundImage: "",
+    backgroundVideo: "",
   });
+
+  // Initialize form data from store whenever heroContent changes
+  useEffect(() => {
+    console.log("Initializing form with hero content:", heroContent);
+    setFormData({
+      mainHeading: heroContent.mainHeading || "",
+      subHeading: heroContent.subHeading || "",
+      quote: heroContent.quote || "",
+      ctaText: heroContent.ctaText || "",
+      footerText: heroContent.footerText || "",
+      backgroundImage: heroContent.backgroundImage || "",
+      backgroundVideo: heroContent.backgroundVideo || "",
+    });
+  }, [heroContent]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    console.log(`Changing ${name} to ${value}`);
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -32,10 +48,20 @@ const HeroEditor = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateHeroContent(formData);
+    console.log("Submitting form with data:", formData);
     
-    // Log the updated data for debugging
-    console.log("Updating hero content with:", formData);
+    // Make sure we don't accidentally send empty strings if values weren't changed
+    const updatedContent = { ...formData };
+    
+    // Remove any properties with empty strings so they don't override existing values
+    Object.keys(updatedContent).forEach(key => {
+      if (updatedContent[key as keyof typeof updatedContent] === "") {
+        delete updatedContent[key as keyof typeof updatedContent];
+      }
+    });
+    
+    console.log("Filtered data to update:", updatedContent);
+    updateHeroContent(updatedContent);
     
     toast({
       title: "Changes saved",

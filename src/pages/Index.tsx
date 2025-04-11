@@ -22,6 +22,7 @@ const Index = () => {
   const [version, setVersion] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const initialLoadDone = useRef(false);
   
   // Initialize content from Supabase when component mounts
@@ -39,6 +40,10 @@ const Index = () => {
           if (success) {
             console.log("CMS data initialized from Supabase");
             setVersion(v => v + 1);
+            
+            // Verify the hero content was loaded properly
+            const heroContent = cmsStore.heroContent;
+            console.log("Hero content after initialization:", heroContent);
             
             toast({
               title: "Content Updated",
@@ -66,7 +71,7 @@ const Index = () => {
     };
     
     initializeCMS();
-  }, [toast]);
+  }, [toast, retryCount, cmsStore]);
   
   // Apply custom CSS
   useEffect(() => {
@@ -92,6 +97,13 @@ const Index = () => {
       }
     };
   }, [stylingStore.globalStyles.customCSS]);
+  
+  // Handler for manual retry
+  const handleRetry = () => {
+    initialLoadDone.current = false;
+    setRetryCount(prev => prev + 1);
+    setError(null);
+  };
 
   // Use a key based on version to force full re-render when data changes
   return (
@@ -114,7 +126,7 @@ const Index = () => {
             <p className="text-red-700 mb-4">{error}</p>
             <button 
               className="px-4 py-2 bg-wedding-black text-white rounded hover:bg-wedding-dark-gray"
-              onClick={() => window.location.reload()}
+              onClick={handleRetry}
             >
               Retry
             </button>

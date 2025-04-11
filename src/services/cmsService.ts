@@ -19,6 +19,8 @@ interface CmsContent<T> {
  */
 export async function fetchContent<T>(contentType: ContentType): Promise<T | null> {
   try {
+    console.log(`Fetching ${contentType} from Supabase...`);
+    
     const { data, error } = await supabase
       .from('cms_content')
       .select('data')
@@ -30,9 +32,10 @@ export async function fetchContent<T>(contentType: ContentType): Promise<T | nul
       return null;
     }
     
+    console.log(`Successfully fetched ${contentType}:`, data?.data);
     return data?.data as T || null;
   } catch (error) {
-    console.error(`Error fetching ${contentType}:`, error);
+    console.error(`Exception fetching ${contentType}:`, error);
     return null;
   }
 }
@@ -41,9 +44,9 @@ export async function fetchContent<T>(contentType: ContentType): Promise<T | nul
  * Update content in Supabase
  * This function accepts any data type and safely converts it to JSON
  */
-export async function updateContent(contentType: ContentType, data: any): Promise<boolean> {
+export async function updateContent<T>(contentType: ContentType, data: T): Promise<boolean> {
   try {
-    console.log(`Updating ${contentType} with data:`, data);
+    console.log(`Preparing to update ${contentType} with data:`, data);
     
     // First check if the content exists
     const { data: existingData, error: queryError } = await supabase
@@ -57,37 +60,47 @@ export async function updateContent(contentType: ContentType, data: any): Promis
       return false;
     }
     
-    // Convert the data to a plain object to ensure it's JSON compatible
-    // This is crucial for handling complex objects with methods or circular references
-    const jsonSafeData = JSON.parse(JSON.stringify(data));
-    console.log(`Converted data for ${contentType}:`, jsonSafeData);
+    // Create a clean copy of the data by serializing and deserializing
+    // This removes any circular references or non-JSON values
+    const jsonSafeData = JSON.parse(JSON.stringify(data)) as Json;
+    console.log(`Sanitized data for ${contentType}:`, jsonSafeData);
     
     let result;
     
     if (existingData) {
       // Update existing record
-      console.log(`Updating existing ${contentType} record`);
+      console.log(`Updating existing ${contentType} record with ID: ${existingData.id}`);
       result = await supabase
         .from('cms_content')
-        .update({ data: jsonSafeData })
+        .update({ 
+          data: jsonSafeData,
+          updated_at: new Date().toISOString()
+        })
         .eq('content_type', contentType);
     } else {
       // Insert new record
       console.log(`Creating new ${contentType} record`);
       result = await supabase
         .from('cms_content')
-        .insert({ content_type: contentType, data: jsonSafeData });
+        .insert({ 
+          content_type: contentType, 
+          data: jsonSafeData,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
     }
     
     if (result.error) {
       console.error(`Error saving ${contentType}:`, result.error);
+      console.error('Full data that failed:', jsonSafeData);
       return false;
     }
     
     console.log(`Successfully saved ${contentType}`);
     return true;
   } catch (error) {
-    console.error(`Error updating ${contentType}:`, error);
+    console.error(`Exception updating ${contentType}:`, error);
+    console.error('Data that failed:', data);
     return false;
   }
 }
@@ -113,6 +126,7 @@ export async function initializeContent() {
     if (data) {
       data.forEach((item: any) => {
         contentMap[item.content_type] = item.data;
+        console.log(`Loaded content type: ${item.content_type}`);
       });
     }
     
