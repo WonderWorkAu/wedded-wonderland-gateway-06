@@ -34,7 +34,29 @@ const HeroSection = () => {
     <div className="relative min-h-screen flex items-center overflow-hidden" style={{ fontFamily: globalStyles.fontFamily }}>
       {/* Background layers */}
       <div className="absolute inset-0 bg-wedding-white">
-        {/* Background video if available */}
+        {/* Background image as fallback */}
+        {heroContent.backgroundImage && !heroContent.backgroundVideo && (
+          <div className="absolute inset-0">
+            {/* Image at full opacity */}
+            <div 
+              className="absolute inset-0 bg-cover bg-center bg-fixed"
+              style={{ 
+                backgroundImage: `url('${heroContent.backgroundImage}')`
+              }}
+            ></div>
+            
+            {/* Separate image overlay with controlled opacity */}
+            <div 
+              className="absolute inset-0" 
+              style={{ 
+                backgroundColor: heroStyles.backgroundImageOverlayColor,
+                opacity: heroStyles.backgroundImageOpacity
+              }}
+            ></div>
+          </div>
+        )}
+        
+        {/* Background video if available - takes priority */}
         {heroContent.backgroundVideo && (
           <div className="absolute inset-0 w-full h-full overflow-hidden">
             {/* Video element - always at full opacity */}
@@ -55,28 +77,6 @@ const HeroSection = () => {
               style={{ 
                 backgroundColor: heroStyles.backgroundVideoOverlayColor,
                 opacity: heroStyles.backgroundVideoOpacity
-              }}
-            ></div>
-          </div>
-        )}
-        
-        {/* Background image as fallback or overlay */}
-        {heroContent.backgroundImage && (
-          <div className="absolute inset-0">
-            {/* Image at full opacity */}
-            <div 
-              className="absolute inset-0 bg-cover bg-center bg-fixed"
-              style={{ 
-                backgroundImage: `url('${heroContent.backgroundImage}')`
-              }}
-            ></div>
-            
-            {/* Separate image overlay with controlled opacity */}
-            <div 
-              className="absolute inset-0" 
-              style={{ 
-                backgroundColor: heroStyles.backgroundImageOverlayColor,
-                opacity: heroStyles.backgroundImageOpacity
               }}
             ></div>
           </div>
