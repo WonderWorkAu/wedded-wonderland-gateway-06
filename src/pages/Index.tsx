@@ -17,7 +17,6 @@ const Index = () => {
   const stylingStore = useStylingStore();
   
   // Optional: Log stores for debugging
-  console.log("CMS Store in Index:", cmsStore);
   console.log("Styling Store in Index:", stylingStore);
   
   // Apply custom CSS

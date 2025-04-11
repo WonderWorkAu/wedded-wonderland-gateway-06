@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,11 +49,6 @@ const StylingEditor = () => {
       title: "Global styles updated",
       description: "Your changes have been saved",
     });
-    
-    // Force a refresh of the page to see changes
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 1500);
   };
 
   const handleHeroSubmit = (e: React.FormEvent) => {
@@ -64,11 +58,6 @@ const StylingEditor = () => {
       title: "Hero styles updated",
       description: "Your changes have been saved",
     });
-    
-    // Force a refresh of the page to see changes
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 1500);
   };
 
   // Font families available

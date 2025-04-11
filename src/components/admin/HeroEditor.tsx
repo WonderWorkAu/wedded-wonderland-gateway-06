@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,11 +41,6 @@ const HeroEditor = () => {
       title: "Changes saved",
       description: "Your hero section has been updated",
     });
-    
-    // Force a refresh of the page to see changes
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 1500);
   };
   
   const selectMedia = (url: string, type: 'image' | 'video') => {
