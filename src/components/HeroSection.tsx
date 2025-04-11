@@ -24,11 +24,16 @@ const HeroSection = () => {
   useEffect(() => {
     if (heroContent?.backgroundVideo) {
       console.log("Setting video URL from hero content:", heroContent.backgroundVideo);
+      
       // Add cache-busting timestamp to force reload
       const timestamp = Date.now();
-      const url = heroContent.backgroundVideo.includes('?') 
-        ? `${heroContent.backgroundVideo}&_=${timestamp}`
-        : `${heroContent.backgroundVideo}?_=${timestamp}`;
+      let url = heroContent.backgroundVideo;
+      
+      // Add cache-busting parameter
+      url = url.includes('?') 
+        ? `${url}&_=${timestamp}`
+        : `${url}?_=${timestamp}`;
+        
       setVideoUrl(url);
       setVideoError(false);
     } else {
@@ -43,9 +48,25 @@ const HeroSection = () => {
       console.log("Loading video from URL:", videoUrl);
       setVideoLoaded(false);
       
+      // Reset video element
+      videoRef.current.pause();
+      videoRef.current.removeAttribute('src');
+      videoRef.current.load();
+      
       // Set the src directly on the video element
       videoRef.current.src = videoUrl;
+      
+      // Force reload
       videoRef.current.load();
+      
+      // Try to play it
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.play().catch(err => {
+            console.warn("Auto-play prevented:", err);
+          });
+        }
+      }, 100);
     }
   }, [videoUrl]);
   
@@ -63,10 +84,10 @@ const HeroSection = () => {
     }
   };
   
-  const handleVideoError = () => {
+  const handleVideoError = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+    console.error("Error loading video from URL:", videoUrl, e);
     setVideoError(true);
     setVideoLoaded(false);
-    console.error("Error loading video from URL:", videoUrl);
   };
   
   const handleScrollToPricing = () => {
@@ -95,11 +116,12 @@ const HeroSection = () => {
               ref={videoRef}
               autoPlay
               muted
-              loop
               playsInline
+              loop
               className="absolute min-w-full min-h-full object-cover w-auto h-auto top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
               onLoadedData={handleVideoLoaded}
               onError={handleVideoError}
+              data-timestamp={Date.now()} // Add a timestamp attribute for debugging
             />
             
             {/* Separate overlay with controlled opacity */}

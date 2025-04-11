@@ -8,7 +8,7 @@ import PricingTables from '@/components/PricingTables';
 import TestimonialsSection from '@/components/TestimonialsSection';
 import CtaSection from '@/components/CtaSection';
 import Footer from '@/components/Footer';
-import { useCMSStore, initializeCMSFromSupabase } from '@/store/cmsStore';
+import { useCMSStore, initializeCMSFromSupabase, refreshCMSFromSupabase } from '@/store/cmsStore';
 import { useStylingStore } from '@/store/stylingStore';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,8 +35,14 @@ const Index = () => {
         setError(null);
         
         try {
-          // Initialize from Supabase
-          const success = await initializeCMSFromSupabase();
+          // First try to refresh CMS data from Supabase
+          let success = await refreshCMSFromSupabase();
+          
+          if (!success) {
+            // Fallback to regular initialization
+            console.log("Refresh failed, falling back to regular initialization");
+            success = await initializeCMSFromSupabase();
+          }
           
           if (success) {
             console.log("CMS data initialized from Supabase");
@@ -89,23 +95,24 @@ const Index = () => {
   // Set up listener for Supabase realtime updates to refresh content
   useEffect(() => {
     // Listen for updates to the cms_content table
-    const subscription = supabase
+    const channel = supabase
       .channel('cms_changes')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'cms_content' },
-        (payload) => {
+        async (payload) => {
           console.log('CMS content changed:', payload);
           // Refresh CMS data when changes occur
           if (initialLoadDone.current) {
-            initializeCMSFromSupabase().then(() => {
+            const success = await refreshCMSFromSupabase();
+            if (success) {
               setVersion(v => v + 1);
               toast({
                 title: "Content Updated",
                 description: "The content has been refreshed from the CMS",
                 variant: "default"
               });
-            });
+            }
           }
         }
       )
@@ -113,7 +120,7 @@ const Index = () => {
 
     // Clean up subscription on unmount
     return () => {
-      supabase.removeChannel(subscription);
+      supabase.removeChannel(channel);
     };
   }, [toast]);
   
@@ -143,8 +150,9 @@ const Index = () => {
   }, [stylingStore.globalStyles.customCSS]);
   
   // Handler for manual retry
-  const handleRetry = () => {
+  const handleRetry = async () => {
     initialLoadDone.current = false;
+    await refreshCMSFromSupabase();
     setRetryCount(prev => prev + 1);
     setError(null);
   };
