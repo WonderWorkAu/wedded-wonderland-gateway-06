@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -13,16 +13,45 @@ const HeroSection = () => {
   const { heroContent } = useCMSStore();
   const { globalStyles, heroStyles } = useStylingStore();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [videoError, setVideoError] = useState(false);
   
   console.log("Hero content in component:", heroContent);
   console.log("Hero styles in component:", heroStyles);
   
-  // Force video reload on component mount to prevent caching issues
+  // Force video reload when component mounts or when URL changes
   useEffect(() => {
     if (videoRef.current && heroContent.backgroundVideo) {
-      videoRef.current.load();
+      const timestamp = Date.now();
+      const videoUrl = heroContent.backgroundVideo.includes('?') 
+        ? `${heroContent.backgroundVideo}&_=${timestamp}`
+        : `${heroContent.backgroundVideo}?_=${timestamp}`;
+      
+      // Set the src attribute with cache busting
+      const sourceElement = videoRef.current.querySelector('source');
+      if (sourceElement) {
+        sourceElement.setAttribute('src', videoUrl);
+        videoRef.current.load();
+        
+        // Reset states
+        setVideoLoaded(false);
+        setVideoError(false);
+      }
     }
   }, [heroContent.backgroundVideo]);
+  
+  // Handle video events
+  const handleVideoLoaded = () => {
+    setVideoLoaded(true);
+    setVideoError(false);
+    console.log("Video loaded successfully");
+  };
+  
+  const handleVideoError = () => {
+    setVideoError(true);
+    setVideoLoaded(false);
+    console.error("Error loading video from URL:", heroContent.backgroundVideo);
+  };
   
   const handleScrollToPricing = () => {
     const pricingSection = document.getElementById('pricing-section');
@@ -52,8 +81,9 @@ const HeroSection = () => {
               muted
               loop
               playsInline
-              key={heroContent.backgroundVideo} // Add key to force re-render when URL changes
               className="absolute min-w-full min-h-full object-cover w-auto h-auto top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+              onLoadedData={handleVideoLoaded}
+              onError={handleVideoError}
             >
               <source src={`${heroContent.backgroundVideo}?_=${Date.now()}`} type="video/mp4" />
               Your browser does not support the video tag.
@@ -70,8 +100,8 @@ const HeroSection = () => {
           </div>
         )}
         
-        {/* Background image as fallback only if no video is available */}
-        {!heroContent.backgroundVideo && heroContent.backgroundImage && (
+        {/* Background image as fallback only if no video is available or video failed to load */}
+        {(!heroContent.backgroundVideo || videoError) && heroContent.backgroundImage && (
           <div className="absolute inset-0">
             {/* Image at full opacity */}
             <div 

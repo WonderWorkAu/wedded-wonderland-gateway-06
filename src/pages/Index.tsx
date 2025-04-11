@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import HeroSection from '@/components/HeroSection';
 import StatsBar from '@/components/StatsBar';
 import BenefitsSection from '@/components/BenefitsSection';
@@ -10,11 +10,16 @@ import CtaSection from '@/components/CtaSection';
 import Footer from '@/components/Footer';
 import { useCMSStore } from '@/store/cmsStore';
 import { useStylingStore } from '@/store/stylingStore';
+import { useToast } from '@/components/ui/use-toast';
 
 const Index = () => {
   // Get stores
   const cmsStore = useCMSStore();
   const stylingStore = useStylingStore();
+  const { toast } = useToast();
+  
+  // Add a version state to force component updates when CMS data changes
+  const [version, setVersion] = useState(0);
   
   // Re-hydrate the stores on page load to ensure latest data
   // Only run this once when the component mounts, not on every render
@@ -23,21 +28,55 @@ const Index = () => {
     const rehydrateStores = () => {
       console.log("Rehydrating stores - one time operation");
       
-      // Only trigger updates if the data actually changed
-      // This avoids unnecessary re-renders and update loops
-      const localHeroContent = JSON.parse(localStorage.getItem('wedded-cms-storage') || '{}')?.state?.heroContent;
-      const localGlobalStyles = JSON.parse(localStorage.getItem('wedded-styling-storage') || '{}')?.state?.globalStyles;
-      
-      if (localHeroContent && JSON.stringify(localHeroContent) !== JSON.stringify(cmsStore.heroContent)) {
-        cmsStore.updateHeroContent(localHeroContent);
-      }
-      
-      if (localGlobalStyles && JSON.stringify(localGlobalStyles) !== JSON.stringify(stylingStore.globalStyles)) {
-        stylingStore.updateGlobalStyles(localGlobalStyles);
+      try {
+        // Clear any browser cache for the localStorage
+        const timestamp = Date.now();
+        
+        // Force a fresh read from localStorage with cache busting
+        const localCmsStorage = JSON.parse(localStorage.getItem(`wedded-cms-storage?t=${timestamp}`) || localStorage.getItem('wedded-cms-storage') || '{}');
+        const localStylingStorage = JSON.parse(localStorage.getItem(`wedded-styling-storage?t=${timestamp}`) || localStorage.getItem('wedded-styling-storage') || '{}');
+        
+        const localHeroContent = localCmsStorage?.state?.heroContent;
+        const localGlobalStyles = localStylingStorage?.state?.globalStyles;
+        
+        // Only trigger updates if we actually have data
+        if (localHeroContent) {
+          console.log("Updating hero content from localStorage:", localHeroContent);
+          cmsStore.updateHeroContent(localHeroContent);
+        }
+        
+        if (localGlobalStyles) {
+          console.log("Updating global styles from localStorage:", localGlobalStyles);
+          stylingStore.updateGlobalStyles(localGlobalStyles);
+        }
+        
+        // Force component update after rehydration
+        setVersion(v => v + 1);
+        
+        toast({
+          title: "Content Updated",
+          description: "The latest content has been loaded from your CMS",
+        });
+      } catch (error) {
+        console.error("Error rehydrating stores:", error);
+        toast({
+          title: "Error Loading Content",
+          description: "There was an issue loading the latest content",
+          variant: "destructive"
+        });
       }
     };
     
     rehydrateStores();
+    
+    // Add event listener for localStorage changes from other tabs
+    window.addEventListener('storage', (event) => {
+      if (event.key && (event.key.includes('wedded-cms') || event.key.includes('wedded-styling'))) {
+        console.log("Local storage updated in another tab, reloading content");
+        window.location.reload();
+      }
+    });
+    
     // Empty dependency array ensures this only runs once on mount
   }, []);
   
@@ -66,8 +105,14 @@ const Index = () => {
     };
   }, [stylingStore.globalStyles.customCSS]);
 
+  // Use a key based on version to force full re-render when data changes
   return (
-    <div className="min-h-screen" style={{ fontFamily: stylingStore.globalStyles.fontFamily }}>
+    <div 
+      key={`page-container-${version}`}
+      className="min-h-screen" 
+      style={{ fontFamily: stylingStore.globalStyles.fontFamily }}
+      data-cms-version={version}
+    >
       <HeroSection />
       <StatsBar />
       <BenefitsSection />
