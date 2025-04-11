@@ -16,6 +16,21 @@ const Index = () => {
   const cmsStore = useCMSStore();
   const stylingStore = useStylingStore();
   
+  // Re-hydrate the stores on page load to ensure latest data
+  useEffect(() => {
+    // Force rehydration of stores
+    const rehydrateStores = async () => {
+      // This will trigger a re-read from localStorage
+      const currentHeroContent = { ...cmsStore.heroContent };
+      cmsStore.updateHeroContent(currentHeroContent);
+      
+      const currentGlobalStyles = { ...stylingStore.globalStyles };
+      stylingStore.updateGlobalStyles(currentGlobalStyles);
+    };
+    
+    rehydrateStores();
+  }, [cmsStore, stylingStore]);
+  
   // Optional: Log stores for debugging
   console.log("Styling Store in Index:", stylingStore);
   
