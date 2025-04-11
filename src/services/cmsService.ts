@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { MediaAsset } from '@/store/types/mediaTypes';
+import { Json } from '@/integrations/supabase/types';
 
 // Define content types for type safety
 export type ContentType = 'heroContent' | 'statsContent' | 'benefitsContent' | 'networkContent' | 'testimonials' | 'mediaAssets';
@@ -39,7 +40,7 @@ export async function fetchContent<T>(contentType: ContentType): Promise<T | nul
 /**
  * Update content in Supabase
  */
-export async function updateContent<T>(contentType: ContentType, data: T): Promise<boolean> {
+export async function updateContent<T extends Json>(contentType: ContentType, data: T): Promise<boolean> {
   try {
     // First check if the content exists
     const { data: existingData, error: queryError } = await supabase
@@ -57,7 +58,7 @@ export async function updateContent<T>(contentType: ContentType, data: T): Promi
       // Update existing record
       const { error } = await supabase
         .from('cms_content')
-        .update({ data })
+        .update({ data: data as Json })
         .eq('content_type', contentType);
       
       if (error) {
@@ -68,7 +69,7 @@ export async function updateContent<T>(contentType: ContentType, data: T): Promi
       // Insert new record
       const { error } = await supabase
         .from('cms_content')
-        .insert({ content_type: contentType, data });
+        .insert({ content_type: contentType, data: data as Json });
       
       if (error) {
         console.error(`Error inserting ${contentType}:`, error);
