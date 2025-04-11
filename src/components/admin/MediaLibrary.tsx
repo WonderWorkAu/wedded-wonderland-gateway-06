@@ -4,18 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { useCMSStore, MediaAsset } from '@/store/cmsStore';
-import { Trash2, Upload, Copy, Check } from 'lucide-react';
+import { useCMSStore } from '@/store/cmsStore';
+import { Trash2, Upload, Copy, Check, Loader2 } from 'lucide-react';
 
 const MediaLibrary = () => {
-  const { mediaAssets, addMediaAsset, removeMediaAsset } = useCMSStore();
+  const { mediaAssets, uploadMediaFile, removeMediaAsset } = useCMSStore();
   const { toast } = useToast();
   const [uploadName, setUploadName] = useState("");
   const [selectedTab, setSelectedTab] = useState<"images" | "videos">("images");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     
@@ -31,31 +32,39 @@ const MediaLibrary = () => {
       return;
     }
     
-    // Create object URL for preview
-    const url = URL.createObjectURL(file);
-    
-    const name = uploadName || file.name;
-    
-    // In a real app, we'd upload to a real storage service here
-    // For demo purposes, we'll just use the object URL
-    const newAsset: MediaAsset = {
-      id: `asset-${Date.now()}`,
-      type,
-      url,
-      name,
-      uploadedAt: new Date().toISOString(),
-    };
-    
-    addMediaAsset(newAsset);
-    setUploadName("");
-    toast({
-      title: "Upload successful",
-      description: `${type} "${name}" has been added to your library`,
-    });
-    
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    try {
+      setIsUploading(true);
+      
+      // Use the uploadMediaFile function that handles Supabase storage
+      const newAsset = await uploadMediaFile(file, uploadName || undefined);
+      
+      if (newAsset) {
+        setUploadName("");
+        toast({
+          title: "Upload successful",
+          description: `${type} "${newAsset.name}" has been added to your library`,
+        });
+      } else {
+        toast({
+          title: "Upload failed",
+          description: "There was an error uploading the file. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      toast({
+        title: "Upload failed",
+        description: "There was an error uploading the file. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+      
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
   
@@ -108,6 +117,7 @@ const MediaLibrary = () => {
                 onChange={(e) => setUploadName(e.target.value)}
                 placeholder="Image name (optional)"
                 className="rounded-none border-wedding-black flex-1"
+                disabled={isUploading}
               />
               <div className="flex gap-2">
                 <input 
@@ -117,13 +127,24 @@ const MediaLibrary = () => {
                   accept="image/*"
                   onChange={handleFileSelect}
                   ref={fileInputRef}
+                  disabled={isUploading}
                 />
                 <Button 
                   onClick={() => document.getElementById('image-upload')?.click()}
                   className="bg-wedding-black text-wedding-white hover:bg-wedding-dark-gray rounded-none"
+                  disabled={isUploading}
                 >
-                  <Upload size={18} className="mr-2" />
-                  Upload Image
+                  {isUploading ? (
+                    <>
+                      <Loader2 size={18} className="mr-2 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <Upload size={18} className="mr-2" />
+                      Upload Image
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
@@ -139,6 +160,7 @@ const MediaLibrary = () => {
                 onChange={(e) => setUploadName(e.target.value)}
                 placeholder="Video name (optional)"
                 className="rounded-none border-wedding-black flex-1"
+                disabled={isUploading}
               />
               <div className="flex gap-2">
                 <input 
@@ -148,13 +170,24 @@ const MediaLibrary = () => {
                   accept="video/*"
                   onChange={handleFileSelect}
                   ref={fileInputRef}
+                  disabled={isUploading}
                 />
                 <Button 
                   onClick={() => document.getElementById('video-upload')?.click()}
                   className="bg-wedding-black text-wedding-white hover:bg-wedding-dark-gray rounded-none"
+                  disabled={isUploading}
                 >
-                  <Upload size={18} className="mr-2" />
-                  Upload Video
+                  {isUploading ? (
+                    <>
+                      <Loader2 size={18} className="mr-2 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <Upload size={18} className="mr-2" />
+                      Upload Video
+                    </>
+                  )}
                 </Button>
               </div>
             </div>

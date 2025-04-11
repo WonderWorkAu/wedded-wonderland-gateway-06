@@ -1,6 +1,7 @@
 
 import { StateCreator } from 'zustand';
 import { HeroContent } from '../types/heroTypes';
+import { updateContent } from '@/services/cmsService';
 
 export interface HeroSlice {
   heroContent: HeroContent;
@@ -21,8 +22,11 @@ export const createHeroSlice: StateCreator<HeroSlice> = (set) => ({
   heroContent: initialHeroContent,
   updateHeroContent: (content) => {
     console.log("Store updating hero content with:", content);
-    set((state) => ({ 
-      heroContent: { ...state.heroContent, ...content } 
-    }));
+    set((state) => {
+      const updatedContent = { ...state.heroContent, ...content };
+      // Sync with Supabase
+      updateContent('heroContent', updatedContent);
+      return { heroContent: updatedContent };
+    });
   },
 });

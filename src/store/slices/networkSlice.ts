@@ -1,6 +1,7 @@
 
 import { StateCreator } from 'zustand';
 import { NetworkContent } from '../types/networkTypes';
+import { updateContent } from '@/services/cmsService';
 
 export interface NetworkSlice {
   networkContent: NetworkContent;
@@ -56,7 +57,10 @@ const initialNetworkContent: NetworkContent = {
 
 export const createNetworkSlice: StateCreator<NetworkSlice> = (set) => ({
   networkContent: initialNetworkContent,
-  updateNetworkContent: (content) => set((state) => ({ 
-    networkContent: { ...state.networkContent, ...content } 
-  })),
+  updateNetworkContent: (content) => set((state) => {
+    const updatedContent = { ...state.networkContent, ...content };
+    // Sync with Supabase
+    updateContent('networkContent', updatedContent);
+    return { networkContent: updatedContent };
+  }),
 });

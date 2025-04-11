@@ -1,6 +1,7 @@
 
 import { StateCreator } from 'zustand';
 import { BenefitsContent } from '../types/benefitsTypes';
+import { updateContent } from '@/services/cmsService';
 
 export interface BenefitsSlice {
   benefitsContent: BenefitsContent;
@@ -47,7 +48,10 @@ const initialBenefitsContent: BenefitsContent = {
 
 export const createBenefitsSlice: StateCreator<BenefitsSlice> = (set) => ({
   benefitsContent: initialBenefitsContent,
-  updateBenefitsContent: (content) => set((state) => ({ 
-    benefitsContent: { ...state.benefitsContent, ...content } 
-  })),
+  updateBenefitsContent: (content) => set((state) => {
+    const updatedContent = { ...state.benefitsContent, ...content };
+    // Sync with Supabase
+    updateContent('benefitsContent', updatedContent);
+    return { benefitsContent: updatedContent };
+  }),
 });

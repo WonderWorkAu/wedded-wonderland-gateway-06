@@ -8,7 +8,7 @@ import PricingTables from '@/components/PricingTables';
 import TestimonialsSection from '@/components/TestimonialsSection';
 import CtaSection from '@/components/CtaSection';
 import Footer from '@/components/Footer';
-import { useCMSStore } from '@/store/cmsStore';
+import { useCMSStore, initializeCMSFromSupabase } from '@/store/cmsStore';
 import { useStylingStore } from '@/store/stylingStore';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -20,89 +20,45 @@ const Index = () => {
   
   // Add a version state to force component updates when CMS data changes
   const [version, setVersion] = useState(0);
+  const [loading, setLoading] = useState(true);
   const initialLoadDone = useRef(false);
   
-  // Re-hydrate the stores on page load to ensure latest data
-  // Only run this once when the component mounts, not on every render
+  // Initialize content from Supabase when component mounts
   useEffect(() => {
-    // This will only run once on initial page load
-    const rehydrateStores = async () => {
-      console.log("Rehydrating stores - one time operation");
-      
-      try {
-        // Clear any browser cache for the localStorage
-        const timestamp = Date.now();
+    const initializeCMS = async () => {
+      if (!initialLoadDone.current) {
+        console.log("Initializing CMS data - one time operation");
+        setLoading(true);
         
-        // Force a fresh read from localStorage with cache busting
-        const localCmsStorage = JSON.parse(
-          localStorage.getItem(`wedded-cms-storage?t=${timestamp}`) || 
-          localStorage.getItem('wedded-cms-storage') || 
-          '{}'
-        );
-        const localStylingStorage = JSON.parse(
-          localStorage.getItem(`wedded-styling-storage?t=${timestamp}`) || 
-          localStorage.getItem('wedded-styling-storage') || 
-          '{}'
-        );
-        
-        const localHeroContent = localCmsStorage?.state?.heroContent;
-        const localGlobalStyles = localStylingStorage?.state?.globalStyles;
-        
-        let updatesApplied = false;
-        
-        // Only trigger updates if we actually have data and it's different
-        if (localHeroContent && JSON.stringify(localHeroContent) !== JSON.stringify(cmsStore.heroContent)) {
-          console.log("Updating hero content from localStorage:", localHeroContent);
-          cmsStore.updateHeroContent(localHeroContent);
-          updatesApplied = true;
-        }
-        
-        if (localGlobalStyles && JSON.stringify(localGlobalStyles) !== JSON.stringify(stylingStore.globalStyles)) {
-          console.log("Updating global styles from localStorage:", localGlobalStyles);
-          stylingStore.updateGlobalStyles(localGlobalStyles);
-          updatesApplied = true;
-        }
-        
-        // Force component update after rehydration if changes were made
-        if (updatesApplied) {
-          setVersion(v => v + 1);
+        try {
+          // Initialize from Supabase
+          const success = await initializeCMSFromSupabase();
           
+          if (success) {
+            console.log("CMS data initialized from Supabase");
+            setVersion(v => v + 1);
+            
+            toast({
+              title: "Content Updated",
+              description: "The latest content has been loaded from the CMS",
+            });
+          }
+        } catch (error) {
+          console.error("Error initializing CMS data:", error);
           toast({
-            title: "Content Updated",
-            description: "The latest content has been loaded from your CMS",
+            title: "Error Loading Content",
+            description: "There was an issue loading the latest content",
+            variant: "destructive"
           });
+        } finally {
+          setLoading(false);
+          initialLoadDone.current = true;
         }
-      } catch (error) {
-        console.error("Error rehydrating stores:", error);
-        toast({
-          title: "Error Loading Content",
-          description: "There was an issue loading the latest content",
-          variant: "destructive"
-        });
-      }
-      
-      initialLoadDone.current = true;
-    };
-    
-    if (!initialLoadDone.current) {
-      rehydrateStores();
-    }
-    
-    // Add event listener for localStorage changes from other tabs
-    const storageHandler = (event: StorageEvent) => {
-      if (event.key && (event.key.includes('wedded-cms') || event.key.includes('wedded-styling'))) {
-        console.log("Local storage updated in another tab, reloading content");
-        window.location.reload();
       }
     };
     
-    window.addEventListener('storage', storageHandler);
-    
-    // Clean up the event listener
-    return () => {
-      window.removeEventListener('storage', storageHandler);
-    };
-  }, []);
+    initializeCMS();
+  }, [toast]);
   
   // Apply custom CSS
   useEffect(() => {
@@ -137,14 +93,25 @@ const Index = () => {
       style={{ fontFamily: stylingStore.globalStyles.fontFamily }}
       data-cms-version={version}
     >
-      <HeroSection />
-      <StatsBar />
-      <BenefitsSection />
-      <NetworkMembersSection />
-      <PricingTables />
-      <TestimonialsSection />
-      <CtaSection />
-      <Footer />
+      {loading ? (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-wedding-light-gray border-t-wedding-black rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-wedding-black">Loading content...</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          <HeroSection />
+          <StatsBar />
+          <BenefitsSection />
+          <NetworkMembersSection />
+          <PricingTables />
+          <TestimonialsSection />
+          <CtaSection />
+          <Footer />
+        </>
+      )}
     </div>
   );
 };

@@ -1,6 +1,7 @@
 
 import { StateCreator } from 'zustand';
 import { StatsContent } from '../types/statsTypes';
+import { updateContent } from '@/services/cmsService';
 
 export interface StatsSlice {
   statsContent: StatsContent;
@@ -26,7 +27,10 @@ const initialStatsContent: StatsContent = {
 
 export const createStatsSlice: StateCreator<StatsSlice> = (set) => ({
   statsContent: initialStatsContent,
-  updateStatsContent: (content) => set((state) => ({ 
-    statsContent: { ...state.statsContent, ...content } 
-  })),
+  updateStatsContent: (content) => set((state) => {
+    const updatedContent = { ...state.statsContent, ...content };
+    // Sync with Supabase
+    updateContent('statsContent', updatedContent);
+    return { statsContent: updatedContent };
+  }),
 });

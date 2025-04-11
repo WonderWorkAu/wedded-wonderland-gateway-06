@@ -5,4 +5,5 @@ export interface MediaAsset {
   url: string;
   name: string;
   uploadedAt: string;
+  storagePath?: string; // Path in Supabase storage
 }

@@ -1,6 +1,7 @@
 
 import { StateCreator } from 'zustand';
 import { Testimonial } from '../types/testimonialTypes';
+import { updateContent } from '@/services/cmsService';
 
 export interface TestimonialsSlice {
   testimonials: Testimonial[];
@@ -54,5 +55,9 @@ const initialTestimonials: Testimonial[] = [
 
 export const createTestimonialsSlice: StateCreator<TestimonialsSlice> = (set) => ({
   testimonials: initialTestimonials,
-  updateTestimonials: (testimonials) => set({ testimonials }),
+  updateTestimonials: (testimonials) => {
+    set({ testimonials });
+    // Sync with Supabase
+    updateContent('testimonials', testimonials);
+  },
 });
