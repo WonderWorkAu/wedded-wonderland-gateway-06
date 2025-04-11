@@ -37,18 +37,19 @@ const HeroSection = () => {
         {/* Background video if available */}
         {heroContent.backgroundVideo && (
           <div className="absolute inset-0 w-full h-full overflow-hidden">
+            {/* Video element - always at full opacity */}
             <video
               autoPlay
               muted
               loop
               playsInline
               className="absolute min-w-full min-h-full object-cover w-auto h-auto top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-              style={{ opacity: heroStyles.backgroundVideoOpacity }}
             >
               <source src={heroContent.backgroundVideo} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
-            {/* Video overlay with color */}
+            
+            {/* Separate video overlay with controlled opacity */}
             <div 
               className="absolute inset-0" 
               style={{ 
@@ -62,14 +63,15 @@ const HeroSection = () => {
         {/* Background image as fallback or overlay */}
         {heroContent.backgroundImage && (
           <div className="absolute inset-0">
+            {/* Image at full opacity */}
             <div 
               className="absolute inset-0 bg-cover bg-center bg-fixed"
               style={{ 
-                backgroundImage: `url('${heroContent.backgroundImage}')`,
-                opacity: heroStyles.backgroundImageOpacity 
+                backgroundImage: `url('${heroContent.backgroundImage}')`
               }}
             ></div>
-            {/* Image overlay with color */}
+            
+            {/* Separate image overlay with controlled opacity */}
             <div 
               className="absolute inset-0" 
               style={{ 

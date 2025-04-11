@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -192,7 +193,7 @@ const StylingEditor = () => {
           <form onSubmit={handleHeroSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium mb-2">Background Video Opacity ({Math.round(heroFormData.backgroundVideoOpacity * 100)}%)</label>
+                <label className="block text-sm font-medium mb-2">Darkened Overlay Strength ({Math.round(heroFormData.backgroundVideoOpacity * 100)}%)</label>
                 <Slider
                   value={[heroFormData.backgroundVideoOpacity * 100]}
                   onValueChange={(value) => handleHeroChange('backgroundVideoOpacity', value[0] / 100)}
@@ -201,6 +202,9 @@ const StylingEditor = () => {
                   step={1}
                   className="py-4"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Higher values create a darker overlay that improves text visibility.
+                </p>
               </div>
               
               <div>
@@ -220,7 +224,7 @@ const StylingEditor = () => {
                   />
                 </div>
                 <div className="mt-2">
-                  <Label className="text-xs mb-1 block">Presets:</Label>
+                  <Label className="text-xs mb-1 block">Dark Shade Presets:</Label>
                   <div className="flex flex-wrap gap-2">
                     {darkColorPresets.map((preset) => (
                       preset.value !== "custom" && (
@@ -241,7 +245,7 @@ const StylingEditor = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium mb-2">Background Image Opacity ({Math.round(heroFormData.backgroundImageOpacity * 100)}%)</label>
+                <label className="block text-sm font-medium mb-2">Background Image Overlay Strength ({Math.round(heroFormData.backgroundImageOpacity * 100)}%)</label>
                 <Slider
                   value={[heroFormData.backgroundImageOpacity * 100]}
                   onValueChange={(value) => handleHeroChange('backgroundImageOpacity', value[0] / 100)}
@@ -250,6 +254,9 @@ const StylingEditor = () => {
                   step={1}
                   className="py-4"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Higher values create a darker overlay that improves text visibility.
+                </p>
               </div>
               
               <div>
@@ -269,7 +276,7 @@ const StylingEditor = () => {
                   />
                 </div>
                 <div className="mt-2">
-                  <Label className="text-xs mb-1 block">Presets:</Label>
+                  <Label className="text-xs mb-1 block">Dark Shade Presets:</Label>
                   <div className="flex flex-wrap gap-2">
                     {darkColorPresets.map((preset) => (
                       preset.value !== "custom" && (
