@@ -22,9 +22,30 @@ const HeroSection = () => {
   
   return (
     <div className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Clean white background */}
+      {/* Background layers */}
       <div className="absolute inset-0 bg-wedding-white">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2070')] bg-cover bg-center bg-fixed opacity-5"></div>
+        {/* Background video if available */}
+        {heroContent.backgroundVideo && (
+          <div className="absolute inset-0 w-full h-full overflow-hidden">
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="absolute min-w-full min-h-full object-cover w-auto h-auto top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-40"
+            >
+              <source src={heroContent.backgroundVideo} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        )}
+        
+        {/* Background image as fallback or overlay */}
+        {heroContent.backgroundImage && (
+          <div className="absolute inset-0 bg-cover bg-center bg-fixed opacity-5"
+               style={{ backgroundImage: `url('${heroContent.backgroundImage}')` }}>
+          </div>
+        )}
       </div>
 
       <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">

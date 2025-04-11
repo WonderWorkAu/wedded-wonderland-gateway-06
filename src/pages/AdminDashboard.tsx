@@ -8,6 +8,7 @@ import TestimonialsEditor from '@/components/admin/TestimonialsEditor';
 import StatsEditor from '@/components/admin/StatsEditor';
 import BenefitsEditor from '@/components/admin/BenefitsEditor';
 import NetworkMembersEditor from '@/components/admin/NetworkMembersEditor';
+import MediaLibrary from '@/components/admin/MediaLibrary';
 import { useToast } from "@/components/ui/use-toast";
 
 const AdminDashboard = () => {
@@ -41,12 +42,13 @@ const AdminDashboard = () => {
         <h1 className="text-3xl font-light mb-8 border-b pb-4">Content Management System</h1>
         
         <Tabs defaultValue="hero" className="w-full">
-          <TabsList className="grid grid-cols-5 mb-8">
+          <TabsList className="grid grid-cols-6 mb-8">
             <TabsTrigger value="hero" className="rounded-none">Hero Section</TabsTrigger>
             <TabsTrigger value="stats" className="rounded-none">Stats Bar</TabsTrigger>
             <TabsTrigger value="benefits" className="rounded-none">Benefits</TabsTrigger>
             <TabsTrigger value="network" className="rounded-none">Network Members</TabsTrigger>
             <TabsTrigger value="testimonials" className="rounded-none">Testimonials</TabsTrigger>
+            <TabsTrigger value="media" className="rounded-none">Media Library</TabsTrigger>
           </TabsList>
           
           <TabsContent value="hero" className="bg-white p-6 border border-wedding-light-gray">
@@ -67,6 +69,10 @@ const AdminDashboard = () => {
           
           <TabsContent value="testimonials" className="bg-white p-6 border border-wedding-light-gray">
             <TestimonialsEditor />
+          </TabsContent>
+          
+          <TabsContent value="media" className="bg-white p-6 border border-wedding-light-gray">
+            <MediaLibrary />
           </TabsContent>
         </Tabs>
       </main>

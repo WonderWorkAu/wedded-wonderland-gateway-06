@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -9,6 +8,8 @@ export interface HeroContent {
   quote?: string;
   ctaText?: string;
   footerText?: string;
+  backgroundVideo?: string;
+  backgroundImage?: string;
 }
 
 export interface StatsContent {
@@ -19,6 +20,7 @@ export interface StatsContent {
     label: string;
     detail: string;
   }>;
+  brandLogos?: string[];
 }
 
 export interface Benefit {
@@ -26,6 +28,7 @@ export interface Benefit {
   description: string;
   highlight: string;
   icon: string;
+  image?: string;
 }
 
 export interface BenefitsContent {
@@ -33,18 +36,21 @@ export interface BenefitsContent {
   subtitle?: string;
   cta?: string;
   benefits: Benefit[];
+  backgroundImage?: string;
 }
 
 export interface NetworkCategory {
   title: string;
   description: string;
   icon: string;
+  image?: string;
 }
 
 export interface NetworkContent {
   title?: string;
   description?: string;
   categories: NetworkCategory[];
+  backgroundImage?: string;
 }
 
 export interface Testimonial {
@@ -53,6 +59,15 @@ export interface Testimonial {
   role: string;
   highlight: string;
   transform: string;
+  image?: string;
+}
+
+export interface MediaAsset {
+  id: string;
+  type: 'image' | 'video';
+  url: string;
+  name: string;
+  uploadedAt: string;
 }
 
 export interface CMSStore {
@@ -61,6 +76,7 @@ export interface CMSStore {
   benefitsContent: BenefitsContent;
   networkContent: NetworkContent;
   testimonials: Testimonial[];
+  mediaAssets: MediaAsset[];
   
   // Update methods
   updateHeroContent: (content: HeroContent) => void;
@@ -68,18 +84,26 @@ export interface CMSStore {
   updateBenefitsContent: (content: BenefitsContent) => void;
   updateNetworkContent: (content: NetworkContent) => void;
   updateTestimonials: (testimonials: Testimonial[]) => void;
+  
+  // Media asset management
+  addMediaAsset: (asset: MediaAsset) => void;
+  removeMediaAsset: (id: string) => void;
+  updateMediaAsset: (id: string, updates: Partial<MediaAsset>) => void;
+  getMediaAssets: () => MediaAsset[];
 }
 
 // Initial data from the components
 export const useCMSStore = create<CMSStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       heroContent: {
         mainHeading: "Your Craft Is World-Class. Your Visibility Should Be Too.",
         subHeading: "Join the exclusive network reaching 10M+ monthly couples across 54+ countries who are actively searching for exceptional wedding professionals like you.",
         quote: "You've mastered your craft. Now it's time to master your market.",
         ctaText: "BECOME A WEDDED PARTNER",
         footerText: "*Limited memberships available for 2025",
+        backgroundVideo: "https://weddednetwork.com/video/wedded-network-hero-video.mp4",
+        backgroundImage: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2070",
       },
       statsContent: {
         heading: "Recognized and Trusted By",
@@ -88,6 +112,13 @@ export const useCMSStore = create<CMSStore>()(
           { value: "54+", label: "Countries With Active Members", detail: "Global Network Access" },
           { value: "10M+", label: "Monthly Audience Reach", detail: "High-Intent Couples" },
           { value: "3M+", label: "Social Media Following", detail: "Multi-Channel Visibility" }
+        ],
+        brandLogos: [
+          "https://weddednetwork.com/images/brand-logos/vogue.svg",
+          "https://weddednetwork.com/images/brand-logos/harpers.svg",
+          "https://weddednetwork.com/images/brand-logos/brides.svg",
+          "https://weddednetwork.com/images/brand-logos/elle.svg",
+          "https://weddednetwork.com/images/brand-logos/bazaar.svg"
         ],
       },
       benefitsContent: {
@@ -218,6 +249,23 @@ export const useCMSStore = create<CMSStore>()(
         }
       ],
       
+      mediaAssets: [
+        {
+          id: "default-hero-video",
+          type: "video",
+          url: "https://weddednetwork.com/video/wedded-network-hero-video.mp4",
+          name: "Default Hero Video",
+          uploadedAt: new Date().toISOString(),
+        },
+        {
+          id: "default-hero-image",
+          type: "image",
+          url: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2070",
+          name: "Default Hero Image",
+          uploadedAt: new Date().toISOString(),
+        }
+      ],
+      
       // Update methods
       updateHeroContent: (content) => set((state) => ({ 
         heroContent: { ...state.heroContent, ...content } 
@@ -232,6 +280,20 @@ export const useCMSStore = create<CMSStore>()(
         networkContent: { ...state.networkContent, ...content } 
       })),
       updateTestimonials: (testimonials) => set({ testimonials }),
+      
+      // Media asset management
+      addMediaAsset: (asset) => set((state) => ({
+        mediaAssets: [...state.mediaAssets, asset]
+      })),
+      removeMediaAsset: (id) => set((state) => ({
+        mediaAssets: state.mediaAssets.filter(asset => asset.id !== id)
+      })),
+      updateMediaAsset: (id, updates) => set((state) => ({
+        mediaAssets: state.mediaAssets.map(asset => 
+          asset.id === id ? { ...asset, ...updates } : asset
+        )
+      })),
+      getMediaAssets: () => get().mediaAssets,
     }),
     {
       name: 'wedded-cms-storage', // name of the item in localStorage
