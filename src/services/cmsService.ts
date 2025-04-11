@@ -1,8 +1,17 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { MediaAsset } from '@/store/types/mediaTypes';
 
 // Define content types for type safety
 export type ContentType = 'heroContent' | 'statsContent' | 'benefitsContent' | 'networkContent' | 'testimonials' | 'mediaAssets';
+
+interface CmsContent<T> {
+  id: string;
+  content_type: ContentType;
+  data: T;
+  created_at: string;
+  updated_at: string;
+}
 
 /**
  * Fetch content from Supabase by content type
@@ -33,11 +42,16 @@ export async function fetchContent<T>(contentType: ContentType): Promise<T | nul
 export async function updateContent<T>(contentType: ContentType, data: T): Promise<boolean> {
   try {
     // First check if the content exists
-    const { data: existingData } = await supabase
+    const { data: existingData, error: queryError } = await supabase
       .from('cms_content')
       .select('id')
       .eq('content_type', contentType)
       .single();
+    
+    if (queryError && queryError.code !== 'PGRST116') { // PGRST116 is the code for "no rows returned"
+      console.error(`Error checking ${contentType}:`, queryError);
+      return false;
+    }
     
     if (existingData) {
       // Update existing record
@@ -86,9 +100,11 @@ export async function initializeContent() {
     
     // Transform array of records into an object keyed by content_type
     const contentMap: Record<string, any> = {};
-    data.forEach(item => {
-      contentMap[item.content_type] = item.data;
-    });
+    if (data) {
+      data.forEach((item: any) => {
+        contentMap[item.content_type] = item.data;
+      });
+    }
     
     return contentMap;
   } catch (error) {
@@ -104,13 +120,14 @@ export const mediaService = {
   /**
    * Upload a file to the media bucket
    */
-  async uploadFile(file: File): Promise<{ url: string; name: string; id: string } | null> {
+  async uploadFile(file: File): Promise<{ url: string; name: string; id: string; storagePath: string } | null> {
     try {
       const fileName = `${Date.now()}_${file.name}`;
+      const filePath = `${fileName}`;
       
       const { data, error } = await supabase.storage
         .from('media')
-        .upload(fileName, file);
+        .upload(filePath, file);
       
       if (error) {
         console.error('Error uploading file:', error);
@@ -120,12 +137,13 @@ export const mediaService = {
       // Get the public URL
       const { data: { publicUrl } } = supabase.storage
         .from('media')
-        .getPublicUrl(fileName);
+        .getPublicUrl(filePath);
       
       return {
         url: publicUrl,
         name: file.name,
-        id: data.path,
+        id: `${Date.now()}`,
+        storagePath: filePath,
       };
     } catch (error) {
       console.error('Error uploading file:', error);
@@ -138,6 +156,11 @@ export const mediaService = {
    */
   async deleteFile(path: string): Promise<boolean> {
     try {
+      if (!path) {
+        console.error('No path provided for file deletion');
+        return false;
+      }
+      
       const { error } = await supabase.storage
         .from('media')
         .remove([path]);
@@ -151,6 +174,40 @@ export const mediaService = {
     } catch (error) {
       console.error('Error deleting file:', error);
       return false;
+    }
+  },
+  
+  /**
+   * List all files in the media bucket
+   */
+  async listFiles(): Promise<MediaAsset[]> {
+    try {
+      const { data, error } = await supabase.storage
+        .from('media')
+        .list();
+      
+      if (error) {
+        console.error('Error listing files:', error);
+        return [];
+      }
+      
+      return data.map(file => {
+        const { data: { publicUrl } } = supabase.storage
+          .from('media')
+          .getPublicUrl(file.name);
+          
+        return {
+          id: file.id,
+          name: file.name,
+          url: publicUrl,
+          type: file.metadata?.mimetype?.startsWith('image/') ? 'image' : 'video',
+          uploadedAt: file.created_at,
+          storagePath: file.name
+        };
+      });
+    } catch (error) {
+      console.error('Error listing files:', error);
+      return [];
     }
   }
 };
