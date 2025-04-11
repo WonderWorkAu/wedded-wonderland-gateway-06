@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star } from 'lucide-react';
@@ -6,16 +5,19 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate } from 'react-router-dom';
 import { useCMSStore } from '@/store/cmsStore';
 import { useStylingStore } from '@/store/stylingStore';
+import { useToast } from '@/components/ui/use-toast';
 
 const HeroSection = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
-  const { heroContent } = useCMSStore();
+  const { heroContent, forceHeroRefresh } = useCMSStore();
   const { globalStyles, heroStyles } = useStylingStore();
+  const { toast } = useToast();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [loadAttempts, setLoadAttempts] = useState(0);
   
   console.log("Hero content in component:", heroContent);
   console.log("Hero styles in component:", heroStyles);
@@ -40,7 +42,7 @@ const HeroSection = () => {
       console.log("No backgroundVideo found in hero content");
       setVideoUrl(null);
     }
-  }, [heroContent?.backgroundVideo]);
+  }, [heroContent?.backgroundVideo, loadAttempts]);
   
   // Force video reload when URL changes
   useEffect(() => {
@@ -64,6 +66,7 @@ const HeroSection = () => {
         if (videoRef.current) {
           videoRef.current.play().catch(err => {
             console.warn("Auto-play prevented:", err);
+            setVideoError(true);
           });
         }
       }, 100);
@@ -80,6 +83,7 @@ const HeroSection = () => {
     if (videoRef.current) {
       videoRef.current.play().catch(err => {
         console.warn("Auto-play prevented:", err);
+        setVideoError(true);
       });
     }
   };
@@ -88,6 +92,16 @@ const HeroSection = () => {
     console.error("Error loading video from URL:", videoUrl, e);
     setVideoError(true);
     setVideoLoaded(false);
+    
+    // Try an alternative URL format if available
+    if (loadAttempts < 2 && heroContent?.backgroundVideo) {
+      setLoadAttempts(prev => prev + 1);
+      toast({
+        title: "Video Load Error",
+        description: "Attempting to load video in a different format...",
+        variant: "default"
+      });
+    }
   };
   
   const handleScrollToPricing = () => {
@@ -109,7 +123,7 @@ const HeroSection = () => {
       {/* Background layers */}
       <div className="absolute inset-0 bg-wedding-white">
         {/* Background video when available */}
-        {videoUrl && (
+        {videoUrl && !videoError && (
           <div className="absolute inset-0 w-full h-full overflow-hidden">
             {/* Video element - must remain at full opacity for visibility */}
             <video

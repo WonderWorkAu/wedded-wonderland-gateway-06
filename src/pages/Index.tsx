@@ -25,6 +25,7 @@ const Index = () => {
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const initialLoadDone = useRef(false);
+  const dataLoadAttempts = useRef(0);
   
   // Initialize content from Supabase when component mounts
   useEffect(() => {
@@ -33,15 +34,17 @@ const Index = () => {
         console.log("Initializing CMS data - one time operation");
         setLoading(true);
         setError(null);
+        dataLoadAttempts.current += 1;
         
         try {
           // First try to refresh CMS data from Supabase
           let success = await refreshCMSFromSupabase();
           
-          if (!success) {
-            // Fallback to regular initialization
-            console.log("Refresh failed, falling back to regular initialization");
-            success = await initializeCMSFromSupabase();
+          if (!success && dataLoadAttempts.current < 3) {
+            console.log(`Initialization attempt ${dataLoadAttempts.current} failed, retrying...`);
+            // Wait a moment before retrying
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            success = await refreshCMSFromSupabase();
           }
           
           if (success) {
@@ -70,6 +73,9 @@ const Index = () => {
             // Force a re-render with default content
             setVersion(v => v + 1);
           }
+          
+          // Mark initialization as complete even if it failed
+          initialLoadDone.current = true;
         } catch (error) {
           console.error("Error initializing CMS data:", error);
           setError("Failed to load content. Using default content instead.");
@@ -82,15 +88,17 @@ const Index = () => {
           
           // Force a re-render with default content
           setVersion(v => v + 1);
+          
+          // Mark initialization as complete even if it failed
+          initialLoadDone.current = true;
         } finally {
           setLoading(false);
-          initialLoadDone.current = true;
         }
       }
     };
     
     initializeCMS();
-  }, [toast, retryCount, cmsStore]);
+  }, [toast, retryCount]);
   
   // Set up listener for Supabase realtime updates to refresh content
   useEffect(() => {
@@ -102,9 +110,18 @@ const Index = () => {
         { event: '*', schema: 'public', table: 'cms_content' },
         async (payload) => {
           console.log('CMS content changed:', payload);
-          // Refresh CMS data when changes occur
+          
+          // Only refresh if initial load is complete
           if (initialLoadDone.current) {
+            toast({
+              title: "Content Change Detected",
+              description: "Refreshing content from the CMS...",
+              variant: "default"
+            });
+            
+            // Refresh CMS data when changes occur
             const success = await refreshCMSFromSupabase();
+            
             if (success) {
               setVersion(v => v + 1);
               toast({
@@ -112,14 +129,23 @@ const Index = () => {
                 description: "The content has been refreshed from the CMS",
                 variant: "default"
               });
+            } else {
+              toast({
+                title: "Refresh Failed",
+                description: "Could not refresh content from the CMS",
+                variant: "destructive"
+              });
             }
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Realtime subscription status:", status);
+      });
 
     // Clean up subscription on unmount
     return () => {
+      console.log("Cleaning up Supabase realtime channel");
       supabase.removeChannel(channel);
     };
   }, [toast]);
@@ -152,6 +178,7 @@ const Index = () => {
   // Handler for manual retry
   const handleRetry = async () => {
     initialLoadDone.current = false;
+    dataLoadAttempts.current = 0;
     await refreshCMSFromSupabase();
     setRetryCount(prev => prev + 1);
     setError(null);
@@ -186,7 +213,7 @@ const Index = () => {
         </div>
       ) : (
         <>
-          <HeroSection />
+          <HeroSection key={`hero-section-${version}`} />
           <StatsBar />
           <BenefitsSection />
           <NetworkMembersSection />

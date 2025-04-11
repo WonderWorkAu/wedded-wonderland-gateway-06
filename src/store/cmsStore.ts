@@ -41,7 +41,7 @@ export const useCMSStore = create<CMSStore>()(
     }),
     {
       name: 'wedded-cms-storage',
-      version: 2, // Increment version to force re-hydration
+      version: 3, // Increment version to force re-hydration
       partialize: (state) => ({
         heroContent: state.heroContent,
         statsContent: state.statsContent,
@@ -71,6 +71,9 @@ export const initializeCMSFromSupabase = async () => {
   console.log('Initializing CMS from Supabase...');
   
   try {
+    // Clear local storage first to ensure we're starting fresh
+    localStorage.removeItem('wedded-cms-storage');
+    
     const contentMap = await initializeContent();
     if (!contentMap) {
       console.log('No content found in Supabase');

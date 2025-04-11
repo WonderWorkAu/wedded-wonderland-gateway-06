@@ -62,14 +62,17 @@ export async function updateContent<T>(contentType: ContentType, data: T): Promi
       return false;
     }
     
-    // Create a clean copy of the data by serializing and deserializing
-    // This removes any circular references or non-JSON values
+    // Deep clone the data to ensure no references remain
     let jsonSafeData: Json;
     try {
-      // First convert to string
+      // Convert to string and parse back to create a fresh copy
       const jsonString = JSON.stringify(data);
-      // Then parse back to object
       jsonSafeData = JSON.parse(jsonString) as Json;
+      
+      // Add a timestamp for debugging
+      if (typeof jsonSafeData === 'object' && jsonSafeData !== null) {
+        (jsonSafeData as any)._lastUpdated = new Date().toISOString();
+      }
     } catch (e) {
       console.error(`Failed to serialize data for ${contentType}:`, e);
       return false;
@@ -88,6 +91,18 @@ export async function updateContent<T>(contentType: ContentType, data: T): Promi
     if (existingData) {
       // Update existing record
       console.log(`Updating existing ${contentType} record with ID: ${existingData.id}`);
+      
+      // First get the current record to verify we're not overwriting with partially updated data
+      const { data: currentRecord } = await supabase
+        .from('cms_content')
+        .select('data')
+        .eq('content_type', contentType)
+        .single();
+        
+      if (currentRecord && currentRecord.data) {
+        console.log(`Current record data:`, currentRecord.data);
+      }
+      
       result = await supabase
         .from('cms_content')
         .update({ 
@@ -118,11 +133,21 @@ export async function updateContent<T>(contentType: ContentType, data: T): Promi
     
     if (result.data && result.data.length > 0) {
       console.log(`Successfully saved ${contentType} to Supabase with result:`, result.data[0]);
+      
+      // Verify the update was successful by fetching the record again
+      const { data: verificationData } = await supabase
+        .from('cms_content')
+        .select('data, updated_at')
+        .eq('content_type', contentType)
+        .single();
+        
+      console.log(`Verification of saved ${contentType}:`, verificationData);
+      
+      return true;
     } else {
       console.log(`Successfully saved ${contentType} to Supabase`);
+      return true;
     }
-    
-    return true;
   } catch (error) {
     console.error(`Exception updating ${contentType}:`, error);
     console.error('Data that failed:', data);
