@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { useCMSStore, verifyContentType } from '@/store/cmsStore';
+import { useCMSStore, verifyContentType, HeroContent } from '@/store/cmsStore';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Image, Film, Save, CheckCircle, AlertCircle } from 'lucide-react';
@@ -79,11 +80,12 @@ const HeroEditor = () => {
         
         // Verify the data was saved by fetching it directly from Supabase
         setTimeout(async () => {
-          const verifiedData = await verifyContentType('heroContent');
+          const verifiedData = await verifyContentType('heroContent') as HeroContent | null;
           console.log("Verification of saved hero content:", verifiedData);
           
-          if (verifiedData?.backgroundVideo !== updatedContent.backgroundVideo && updatedContent.backgroundVideo) {
-            console.warn("Background video may not have saved correctly. DB value:", verifiedData?.backgroundVideo);
+          if (verifiedData && updatedContent.backgroundVideo && 
+              verifiedData.backgroundVideo !== updatedContent.backgroundVideo) {
+            console.warn("Background video may not have saved correctly. DB value:", verifiedData.backgroundVideo);
             toast({
               title: "Warning",
               description: "Background video URL might not have saved correctly. Please check and try again.",
