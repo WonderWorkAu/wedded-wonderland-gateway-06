@@ -9,7 +9,7 @@ import { BenefitsSlice, createBenefitsSlice } from './slices/benefitsSlice';
 import { NetworkSlice, createNetworkSlice } from './slices/networkSlice';
 import { TestimonialsSlice, createTestimonialsSlice } from './slices/testimonialsSlice';
 import { MediaSlice, createMediaSlice } from './slices/mediaSlice';
-import { initializeContent } from '@/services/cmsService';
+import { initializeContent, fetchContent } from '@/services/cmsService';
 
 // Re-export all types for convenience
 export * from './types/heroTypes';
@@ -65,19 +65,44 @@ export const useCMSStore = create<CMSStore>()(
             
             // After local rehydration, fetch fresh data from Supabase
             initializeContent().then((contentMap) => {
-              if (!contentMap) return;
+              if (!contentMap) {
+                console.log('No content map found in Supabase, using localStorage data');
+                return;
+              }
               
+              console.log('Content map from Supabase:', contentMap);
               const store = useCMSStore.getState();
               
               // Update each content type if available in Supabase
-              if (contentMap.heroContent) store.updateHeroContent(contentMap.heroContent);
-              if (contentMap.statsContent) store.updateStatsContent(contentMap.statsContent);
-              if (contentMap.benefitsContent) store.updateBenefitsContent(contentMap.benefitsContent);
-              if (contentMap.networkContent) store.updateNetworkContent(contentMap.networkContent);
-              if (contentMap.testimonials) store.updateTestimonials(contentMap.testimonials);
+              if (contentMap.heroContent) {
+                console.log('Updating hero content from Supabase');
+                store.updateHeroContent(contentMap.heroContent);
+              }
+              
+              if (contentMap.statsContent) {
+                console.log('Updating stats content from Supabase');
+                store.updateStatsContent(contentMap.statsContent);
+              }
+              
+              if (contentMap.benefitsContent) {
+                console.log('Updating benefits content from Supabase');
+                store.updateBenefitsContent(contentMap.benefitsContent);
+              }
+              
+              if (contentMap.networkContent) {
+                console.log('Updating network content from Supabase');
+                store.updateNetworkContent(contentMap.networkContent);
+              }
+              
+              if (contentMap.testimonials) {
+                console.log('Updating testimonials from Supabase');
+                store.updateTestimonials(contentMap.testimonials);
+              }
+              
               if (contentMap.mediaAssets) {
                 // For media assets, we need special handling to maintain backward compatibility
                 if (Array.isArray(contentMap.mediaAssets)) {
+                  console.log('Updating media assets from Supabase');
                   store.setMediaAssets(contentMap.mediaAssets);
                 }
               }
@@ -96,20 +121,51 @@ export const useCMSStore = create<CMSStore>()(
 // the localStorage is empty or corrupted
 export const initializeCMSFromSupabase = async () => {
   console.log('Initializing CMS from Supabase...');
-  const contentMap = await initializeContent();
-  if (!contentMap) return false;
   
-  const store = useCMSStore.getState();
-  
-  // Update each content type if available
-  if (contentMap.heroContent) store.updateHeroContent(contentMap.heroContent);
-  if (contentMap.statsContent) store.updateStatsContent(contentMap.statsContent);
-  if (contentMap.benefitsContent) store.updateBenefitsContent(contentMap.benefitsContent);
-  if (contentMap.networkContent) store.updateNetworkContent(contentMap.networkContent);
-  if (contentMap.testimonials) store.updateTestimonials(contentMap.testimonials);
-  if (contentMap.mediaAssets && Array.isArray(contentMap.mediaAssets)) {
-    store.setMediaAssets(contentMap.mediaAssets);
+  try {
+    const contentMap = await initializeContent();
+    if (!contentMap) {
+      console.log('No content found in Supabase');
+      return false;
+    }
+    
+    console.log('Retrieved content map from Supabase:', contentMap);
+    const store = useCMSStore.getState();
+    
+    // Update each content type if available
+    if (contentMap.heroContent) {
+      console.log('Setting heroContent from Supabase:', contentMap.heroContent);
+      store.updateHeroContent(contentMap.heroContent);
+    }
+    
+    if (contentMap.statsContent) {
+      console.log('Setting statsContent from Supabase:', contentMap.statsContent);
+      store.updateStatsContent(contentMap.statsContent);
+    }
+    
+    if (contentMap.benefitsContent) {
+      console.log('Setting benefitsContent from Supabase:', contentMap.benefitsContent);
+      store.updateBenefitsContent(contentMap.benefitsContent);
+    }
+    
+    if (contentMap.networkContent) {
+      console.log('Setting networkContent from Supabase:', contentMap.networkContent);
+      store.updateNetworkContent(contentMap.networkContent);
+    }
+    
+    if (contentMap.testimonials) {
+      console.log('Setting testimonials from Supabase:', contentMap.testimonials);
+      store.updateTestimonials(contentMap.testimonials);
+    }
+    
+    if (contentMap.mediaAssets && Array.isArray(contentMap.mediaAssets)) {
+      console.log('Setting mediaAssets from Supabase:', contentMap.mediaAssets);
+      store.setMediaAssets(contentMap.mediaAssets);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error initializing from Supabase:', error);
+    return false;
   }
-  
-  return true;
 };
