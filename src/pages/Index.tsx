@@ -11,6 +11,7 @@ import Footer from '@/components/Footer';
 import { useCMSStore, initializeCMSFromSupabase } from '@/store/cmsStore';
 import { useStylingStore } from '@/store/stylingStore';
 import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
   // Get stores
@@ -39,7 +40,6 @@ const Index = () => {
           
           if (success) {
             console.log("CMS data initialized from Supabase");
-            setVersion(v => v + 1);
             
             // Verify the hero content was loaded properly
             const heroContent = cmsStore.heroContent;
@@ -49,9 +49,19 @@ const Index = () => {
               title: "Content Updated",
               description: "The latest content has been loaded from the CMS",
             });
+
+            // Force a re-render after content is loaded
+            setVersion(v => v + 1);
           } else {
             console.log("Using default content since Supabase initialization failed");
             // Even on failure, we should proceed with default content
+            toast({
+              title: "Using Default Content",
+              description: "Could not load content from the CMS, using default values",
+              variant: "default"
+            });
+            
+            // Force a re-render with default content
             setVersion(v => v + 1);
           }
         } catch (error) {
@@ -63,6 +73,9 @@ const Index = () => {
             description: "There was an issue loading the latest content",
             variant: "destructive"
           });
+          
+          // Force a re-render with default content
+          setVersion(v => v + 1);
         } finally {
           setLoading(false);
           initialLoadDone.current = true;
@@ -72,6 +85,37 @@ const Index = () => {
     
     initializeCMS();
   }, [toast, retryCount, cmsStore]);
+  
+  // Set up listener for Supabase realtime updates to refresh content
+  useEffect(() => {
+    // Listen for updates to the cms_content table
+    const subscription = supabase
+      .channel('cms_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'cms_content' },
+        (payload) => {
+          console.log('CMS content changed:', payload);
+          // Refresh CMS data when changes occur
+          if (initialLoadDone.current) {
+            initializeCMSFromSupabase().then(() => {
+              setVersion(v => v + 1);
+              toast({
+                title: "Content Updated",
+                description: "The content has been refreshed from the CMS",
+                variant: "default"
+              });
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    // Clean up subscription on unmount
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [toast]);
   
   // Apply custom CSS
   useEffect(() => {

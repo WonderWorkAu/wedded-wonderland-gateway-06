@@ -48,6 +48,11 @@ export async function updateContent<T>(contentType: ContentType, data: T): Promi
   try {
     console.log(`Preparing to update ${contentType} with data:`, data);
     
+    if (!data) {
+      console.error(`Cannot update ${contentType} with null or undefined data`);
+      return false;
+    }
+    
     // First check if the content exists
     const { data: existingData, error: queryError } = await supabase
       .from('cms_content')
@@ -63,6 +68,13 @@ export async function updateContent<T>(contentType: ContentType, data: T): Promi
     // Create a clean copy of the data by serializing and deserializing
     // This removes any circular references or non-JSON values
     const jsonSafeData = JSON.parse(JSON.stringify(data)) as Json;
+    
+    // Additional validation to ensure the data is properly formatted
+    if (!jsonSafeData) {
+      console.error(`Failed to create JSON-safe data for ${contentType}`);
+      return false;
+    }
+    
     console.log(`Sanitized data for ${contentType}:`, jsonSafeData);
     
     let result;
@@ -96,7 +108,7 @@ export async function updateContent<T>(contentType: ContentType, data: T): Promi
       return false;
     }
     
-    console.log(`Successfully saved ${contentType}`);
+    console.log(`Successfully saved ${contentType} to Supabase`);
     return true;
   } catch (error) {
     console.error(`Exception updating ${contentType}:`, error);
@@ -123,14 +135,20 @@ export async function initializeContent() {
     
     // Transform array of records into an object keyed by content_type
     const contentMap: Record<string, any> = {};
-    if (data) {
+    if (data && data.length > 0) {
       data.forEach((item: any) => {
-        contentMap[item.content_type] = item.data;
-        console.log(`Loaded content type: ${item.content_type}`);
+        if (item && item.content_type && item.data) {
+          contentMap[item.content_type] = item.data;
+          console.log(`Loaded content type: ${item.content_type} with data:`, item.data);
+        } else {
+          console.warn('Found incomplete data item:', item);
+        }
       });
+      console.log('Initialized content map from Supabase:', contentMap);
+    } else {
+      console.log('No content found in Supabase, using default values');
     }
     
-    console.log('Initialized content map:', contentMap);
     return contentMap;
   } catch (error) {
     console.error('Error initializing content:', error);

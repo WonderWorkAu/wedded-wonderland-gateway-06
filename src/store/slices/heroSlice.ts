@@ -5,7 +5,7 @@ import { updateContent } from '@/services/cmsService';
 
 export interface HeroSlice {
   heroContent: HeroContent;
-  updateHeroContent: (content: HeroContent) => void;
+  updateHeroContent: (content: Partial<HeroContent>) => Promise<boolean>;
 }
 
 const initialHeroContent: HeroContent = {
@@ -18,34 +18,40 @@ const initialHeroContent: HeroContent = {
   backgroundImage: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2070",
 };
 
-export const createHeroSlice: StateCreator<HeroSlice> = (set) => ({
+export const createHeroSlice: StateCreator<HeroSlice> = (set, get) => ({
   heroContent: initialHeroContent,
-  updateHeroContent: (content) => {
+  updateHeroContent: async (content) => {
     console.log("Store updating hero content with:", content);
+    
+    let success = false;
     
     // Make sure we have a complete hero content object by merging with current state
     set((state) => {
       const updatedContent = { ...state.heroContent, ...content };
       
-      // Verify we have the background video before sending to Supabase
-      console.log("Final hero content to be saved:", updatedContent);
-      
-      // Sync with Supabase - wrap in try/catch for better error handling
-      try {
-        updateContent('heroContent', updatedContent)
-          .then(success => {
-            if (!success) {
-              console.error("Failed to update hero content in Supabase");
-            }
-          })
-          .catch(error => {
-            console.error("Error updating hero content:", error);
-          });
-      } catch (error) {
-        console.error("Exception during hero content update:", error);
-      }
+      // Log the full content that will be saved
+      console.log("Full hero content to be saved:", updatedContent);
       
       return { heroContent: updatedContent };
     });
+    
+    // Get the updated content from the store after the state update
+    const currentContent = get().heroContent;
+    
+    // Sync with Supabase using async/await for better error handling
+    try {
+      success = await updateContent('heroContent', currentContent);
+      
+      if (!success) {
+        console.error("Failed to update hero content in Supabase");
+      } else {
+        console.log("Successfully updated hero content in Supabase:", currentContent);
+      }
+    } catch (error) {
+      console.error("Exception during hero content update:", error);
+      success = false;
+    }
+    
+    return success;
   },
 });
