@@ -11,6 +11,8 @@ const HeroSection = () => {
   const navigate = useNavigate();
   const { heroContent } = useCMSStore();
   
+  console.log("Hero content in component:", heroContent);
+  
   const handleScrollToPricing = () => {
     const pricingSection = document.getElementById('pricing-section');
     if (pricingSection) {

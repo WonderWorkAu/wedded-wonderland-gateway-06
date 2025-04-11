@@ -34,10 +34,19 @@ const HeroEditor = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateHeroContent(formData);
+    
+    // Log the updated data for debugging
+    console.log("Updating hero content with:", formData);
+    
     toast({
       title: "Changes saved",
       description: "Your hero section has been updated",
     });
+    
+    // Force a refresh of the page to see changes
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 1500);
   };
   
   const selectMedia = (url: string, type: 'image' | 'video') => {

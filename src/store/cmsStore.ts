@@ -92,7 +92,7 @@ export interface CMSStore {
   getMediaAssets: () => MediaAsset[];
 }
 
-// Initial data from the components
+// Create the store with persist middleware to save to localStorage
 export const useCMSStore = create<CMSStore>()(
   persist(
     (set, get) => ({
@@ -105,6 +105,7 @@ export const useCMSStore = create<CMSStore>()(
         backgroundVideo: "https://weddednetwork.com/video/wedded-network-hero-video.mp4",
         backgroundImage: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2070",
       },
+      
       statsContent: {
         heading: "Recognized and Trusted By",
         brands: ["VOGUE", "HARPER'S", "BRIDES", "ELLE", "BAZAAR"],
@@ -121,6 +122,7 @@ export const useCMSStore = create<CMSStore>()(
           "https://weddednetwork.com/images/brand-logos/bazaar.svg"
         ],
       },
+      
       benefitsContent: {
         title: "Why Top Professionals Join Our Network",
         subtitle: "Unlock unparalleled opportunities to grow your luxury wedding business on a global scale",
@@ -158,6 +160,7 @@ export const useCMSStore = create<CMSStore>()(
           }
         ]
       },
+      
       networkContent: {
         title: "Who Belongs in the Network",
         description: "The Wedded Network is a global collective of the most talented, trusted, and forward-thinking professionals in weddings, events, and celebrations. If you're elevating the industry through excellence, innovation, or inspiration — you belong here.",
@@ -204,6 +207,7 @@ export const useCMSStore = create<CMSStore>()(
           }
         ]
       },
+      
       testimonials: [
         {
           name: "Nagam",
@@ -267,36 +271,55 @@ export const useCMSStore = create<CMSStore>()(
       ],
       
       // Update methods
-      updateHeroContent: (content) => set((state) => ({ 
-        heroContent: { ...state.heroContent, ...content } 
-      })),
+      updateHeroContent: (content) => {
+        console.log("Store updating hero content with:", content);
+        set((state) => ({ 
+          heroContent: { ...state.heroContent, ...content } 
+        }));
+      },
+      
       updateStatsContent: (content) => set((state) => ({ 
         statsContent: { ...state.statsContent, ...content } 
       })),
+      
       updateBenefitsContent: (content) => set((state) => ({ 
         benefitsContent: { ...state.benefitsContent, ...content } 
       })),
+      
       updateNetworkContent: (content) => set((state) => ({ 
         networkContent: { ...state.networkContent, ...content } 
       })),
+      
       updateTestimonials: (testimonials) => set({ testimonials }),
       
       // Media asset management
       addMediaAsset: (asset) => set((state) => ({
         mediaAssets: [...state.mediaAssets, asset]
       })),
+      
       removeMediaAsset: (id) => set((state) => ({
         mediaAssets: state.mediaAssets.filter(asset => asset.id !== id)
       })),
+      
       updateMediaAsset: (id, updates) => set((state) => ({
         mediaAssets: state.mediaAssets.map(asset => 
           asset.id === id ? { ...asset, ...updates } : asset
         )
       })),
+      
       getMediaAssets: () => get().mediaAssets,
     }),
     {
       name: 'wedded-cms-storage', // name of the item in localStorage
+      version: 1, // version number for potential future migrations
+      partialize: (state) => ({
+        heroContent: state.heroContent,
+        statsContent: state.statsContent,
+        benefitsContent: state.benefitsContent,
+        networkContent: state.networkContent,
+        testimonials: state.testimonials,
+        mediaAssets: state.mediaAssets,
+      }),
     }
   )
 );

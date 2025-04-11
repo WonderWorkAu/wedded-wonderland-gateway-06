@@ -10,12 +10,16 @@ import BenefitsEditor from '@/components/admin/BenefitsEditor';
 import NetworkMembersEditor from '@/components/admin/NetworkMembersEditor';
 import MediaLibrary from '@/components/admin/MediaLibrary';
 import { useToast } from "@/components/ui/use-toast";
+import { useCMSStore } from '@/store/cmsStore';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
+  
+  // Force a refresh of the store data when the component loads
+  const store = useCMSStore();
+  
   useEffect(() => {
     const adminAuth = localStorage.getItem('admin_authenticated');
     if (adminAuth !== 'true') {
@@ -28,7 +32,10 @@ const AdminDashboard = () => {
     } else {
       setIsAuthenticated(true);
     }
-  }, [navigate, toast]);
+    
+    // Log the current store state
+    console.log("CMS Store state in Admin Dashboard:", store);
+  }, [navigate, toast, store]);
 
   if (!isAuthenticated) {
     return <div className="flex items-center justify-center h-screen">Checking authentication...</div>;
