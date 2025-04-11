@@ -5,13 +5,16 @@ import { ArrowRight, Star } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate } from 'react-router-dom';
 import { useCMSStore } from '@/store/cmsStore';
+import { useStylingStore } from '@/store/stylingStore';
 
 const HeroSection = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { heroContent } = useCMSStore();
+  const { globalStyles, heroStyles } = useStylingStore();
   
   console.log("Hero content in component:", heroContent);
+  console.log("Hero styles in component:", heroStyles);
   
   const handleScrollToPricing = () => {
     const pricingSection = document.getElementById('pricing-section');
@@ -22,8 +25,13 @@ const HeroSection = () => {
     }
   };
   
+  // Helper function to get the font size based on mobile or desktop
+  const getFontSize = (sizes: { mobile: string; desktop: string }) => {
+    return isMobile ? `text-${sizes.mobile}` : `text-${sizes.desktop}`;
+  };
+  
   return (
-    <div className="relative min-h-screen flex items-center overflow-hidden">
+    <div className="relative min-h-screen flex items-center overflow-hidden" style={{ fontFamily: globalStyles.fontFamily }}>
       {/* Background layers */}
       <div className="absolute inset-0 bg-wedding-white">
         {/* Background video if available */}
@@ -34,7 +42,8 @@ const HeroSection = () => {
               muted
               loop
               playsInline
-              className="absolute min-w-full min-h-full object-cover w-auto h-auto top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-40"
+              className="absolute min-w-full min-h-full object-cover w-auto h-auto top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+              style={{ opacity: heroStyles.backgroundVideoOpacity }}
             >
               <source src={heroContent.backgroundVideo} type="video/mp4" />
               Your browser does not support the video tag.
@@ -44,8 +53,11 @@ const HeroSection = () => {
         
         {/* Background image as fallback or overlay */}
         {heroContent.backgroundImage && (
-          <div className="absolute inset-0 bg-cover bg-center bg-fixed opacity-5"
-               style={{ backgroundImage: `url('${heroContent.backgroundImage}')` }}>
+          <div className="absolute inset-0 bg-cover bg-center bg-fixed"
+               style={{ 
+                 backgroundImage: `url('${heroContent.backgroundImage}')`,
+                 opacity: heroStyles.backgroundImageOpacity 
+               }}>
           </div>
         )}
       </div>
@@ -59,7 +71,7 @@ const HeroSection = () => {
             </div>
           </div>
           
-          <h1 className="text-3xl md:text-6xl lg:text-7xl font-light text-wedding-black mb-6 md:mb-8 leading-tight tracking-tight">
+          <h1 className={`${getFontSize(heroStyles.headingFontSize)} font-light text-wedding-black mb-6 md:mb-8 leading-tight tracking-tight`}>
             {heroContent.mainHeading?.split(' ').map((word, index, array) => {
               // Apply styling to "World-Class" and "Visibility"
               if (word === "World-Class." || word === "Visibility") {
@@ -73,12 +85,12 @@ const HeroSection = () => {
             })}
           </h1>
           
-          <p className="text-lg md:text-2xl text-wedding-dark-gray mb-8 max-w-3xl">
+          <p className={`${getFontSize(heroStyles.subheadingFontSize)} text-wedding-dark-gray mb-8 max-w-3xl`}>
             {heroContent.subHeading}
           </p>
           
           <div className="mb-10 md:mb-12 py-4 md:py-6 px-6 md:px-8 bg-wedding-black rounded-none">
-            <p className="text-lg md:text-2xl italic text-wedding-white font-light">
+            <p className={`${getFontSize(heroStyles.quoteFontSize)} italic text-wedding-white font-light`}>
               "{heroContent.quote}"
             </p>
           </div>
@@ -86,6 +98,10 @@ const HeroSection = () => {
           <Button 
             className="black-button text-base md:text-lg px-8 md:px-10 py-6 md:py-7 rounded-none flex items-center gap-3 group hover:scale-105 transition-all duration-300 uppercase tracking-widest"
             onClick={handleScrollToPricing}
+            style={{ 
+              backgroundColor: globalStyles.primaryColor,
+              color: globalStyles.secondaryColor
+            }}
           >
             <span className="font-semibold">{heroContent.ctaText}</span>
             <ArrowRight className="transition-transform duration-300 group-hover:translate-x-1" size={20} />
