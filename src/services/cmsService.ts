@@ -39,8 +39,9 @@ export async function fetchContent<T>(contentType: ContentType): Promise<T | nul
 
 /**
  * Update content in Supabase
+ * This function accepts any data type and safely converts it to JSON
  */
-export async function updateContent<T extends Json>(contentType: ContentType, data: T): Promise<boolean> {
+export async function updateContent(contentType: ContentType, data: any): Promise<boolean> {
   try {
     // First check if the content exists
     const { data: existingData, error: queryError } = await supabase
@@ -54,11 +55,14 @@ export async function updateContent<T extends Json>(contentType: ContentType, da
       return false;
     }
     
+    // Convert the data to a plain object to ensure it's JSON compatible
+    const jsonSafeData = JSON.parse(JSON.stringify(data));
+    
     if (existingData) {
       // Update existing record
       const { error } = await supabase
         .from('cms_content')
-        .update({ data: data as Json })
+        .update({ data: jsonSafeData })
         .eq('content_type', contentType);
       
       if (error) {
@@ -69,7 +73,7 @@ export async function updateContent<T extends Json>(contentType: ContentType, da
       // Insert new record
       const { error } = await supabase
         .from('cms_content')
-        .insert({ content_type: contentType, data: data as Json });
+        .insert({ content_type: contentType, data: jsonSafeData });
       
       if (error) {
         console.error(`Error inserting ${contentType}:`, error);
