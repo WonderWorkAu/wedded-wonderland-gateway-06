@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -12,17 +12,9 @@ const HeroSection = () => {
   const navigate = useNavigate();
   const { heroContent } = useCMSStore();
   const { globalStyles, heroStyles } = useStylingStore();
-  const videoRef = useRef<HTMLVideoElement>(null);
   
   console.log("Hero content in component:", heroContent);
   console.log("Hero styles in component:", heroStyles);
-  
-  // Force video reload on component mount to prevent caching issues
-  useEffect(() => {
-    if (videoRef.current && heroContent.backgroundVideo) {
-      videoRef.current.load();
-    }
-  }, [heroContent.backgroundVideo]);
   
   const handleScrollToPricing = () => {
     const pricingSection = document.getElementById('pricing-section');
@@ -47,15 +39,13 @@ const HeroSection = () => {
           <div className="absolute inset-0 w-full h-full overflow-hidden">
             {/* Video element - must remain at full opacity for visibility */}
             <video
-              ref={videoRef}
               autoPlay
               muted
               loop
               playsInline
-              key={heroContent.backgroundVideo} // Add key to force re-render when URL changes
               className="absolute min-w-full min-h-full object-cover w-auto h-auto top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
             >
-              <source src={`${heroContent.backgroundVideo}?_=${Date.now()}`} type="video/mp4" />
+              <source src={heroContent.backgroundVideo} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
             
@@ -77,7 +67,7 @@ const HeroSection = () => {
             <div 
               className="absolute inset-0 bg-cover bg-center bg-fixed"
               style={{ 
-                backgroundImage: `url('${heroContent.backgroundImage}?_=${Date.now()}')`
+                backgroundImage: `url('${heroContent.backgroundImage}')`
               }}
             ></div>
             

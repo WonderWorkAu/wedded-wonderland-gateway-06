@@ -12,34 +12,12 @@ import { useCMSStore } from '@/store/cmsStore';
 import { useStylingStore } from '@/store/stylingStore';
 
 const Index = () => {
-  // Get stores
+  // Force a rerender when the store is updated
   const cmsStore = useCMSStore();
   const stylingStore = useStylingStore();
   
-  // Re-hydrate the stores on page load to ensure latest data
-  // Only run this once when the component mounts, not on every render
-  useEffect(() => {
-    // This will only run once on initial page load
-    const rehydrateStores = () => {
-      console.log("Rehydrating stores - one time operation");
-      
-      // Only trigger updates if the data actually changed
-      // This avoids unnecessary re-renders and update loops
-      const localHeroContent = JSON.parse(localStorage.getItem('wedded-cms-storage') || '{}')?.state?.heroContent;
-      const localGlobalStyles = JSON.parse(localStorage.getItem('wedded-styling-storage') || '{}')?.state?.globalStyles;
-      
-      if (localHeroContent && JSON.stringify(localHeroContent) !== JSON.stringify(cmsStore.heroContent)) {
-        cmsStore.updateHeroContent(localHeroContent);
-      }
-      
-      if (localGlobalStyles && JSON.stringify(localGlobalStyles) !== JSON.stringify(stylingStore.globalStyles)) {
-        stylingStore.updateGlobalStyles(localGlobalStyles);
-      }
-    };
-    
-    rehydrateStores();
-    // Empty dependency array ensures this only runs once on mount
-  }, []);
+  // Optional: Log stores for debugging
+  console.log("Styling Store in Index:", stylingStore);
   
   // Apply custom CSS
   useEffect(() => {
