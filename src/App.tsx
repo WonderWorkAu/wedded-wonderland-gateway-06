@@ -8,8 +8,6 @@ import Index from "./pages/Index";
 import Success from "./pages/Success";
 import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
-import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient({
@@ -32,10 +30,6 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/success" element={<Success />} />
           <Route path="/pricing" element={<Pricing />} />
-          
-          {/* Admin routes */}
-          <Route path="/admin-login" element={<AdminLogin />} />
-          <Route path="/admin" element={<AdminDashboard />} />
           
           {/* Handle redirects for potential old URLs */}
           <Route path="/home" element={<Navigate to="/" replace />} />
