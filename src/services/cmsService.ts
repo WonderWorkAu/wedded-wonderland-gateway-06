@@ -1,18 +1,8 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { MediaAsset } from '@/store/types/mediaTypes';
-import { Json } from '@/integrations/supabase/types';
 
 // Define content types for type safety
 export type ContentType = 'heroContent' | 'statsContent' | 'benefitsContent' | 'networkContent' | 'testimonials' | 'mediaAssets';
-
-interface CmsContent<T> {
-  id: string;
-  content_type: ContentType;
-  data: T;
-  created_at: string;
-  updated_at: string;
-}
 
 /**
  * Fetch content from Supabase by content type
@@ -39,52 +29,39 @@ export async function fetchContent<T>(contentType: ContentType): Promise<T | nul
 
 /**
  * Update content in Supabase
- * This function accepts any data type and safely converts it to JSON
  */
-export async function updateContent(contentType: ContentType, data: any): Promise<boolean> {
+export async function updateContent<T>(contentType: ContentType, data: T): Promise<boolean> {
   try {
-    console.log(`Updating ${contentType} with data:`, data);
-    
     // First check if the content exists
-    const { data: existingData, error: queryError } = await supabase
+    const { data: existingData } = await supabase
       .from('cms_content')
       .select('id')
       .eq('content_type', contentType)
       .single();
     
-    if (queryError && queryError.code !== 'PGRST116') { // PGRST116 is the code for "no rows returned"
-      console.error(`Error checking ${contentType}:`, queryError);
-      return false;
-    }
-    
-    // Convert the data to a plain object to ensure it's JSON compatible
-    // This is crucial for handling complex objects with methods or circular references
-    const jsonSafeData = JSON.parse(JSON.stringify(data));
-    console.log(`Converted data for ${contentType}:`, jsonSafeData);
-    
-    let result;
-    
     if (existingData) {
       // Update existing record
-      console.log(`Updating existing ${contentType} record`);
-      result = await supabase
+      const { error } = await supabase
         .from('cms_content')
-        .update({ data: jsonSafeData })
+        .update({ data })
         .eq('content_type', contentType);
+      
+      if (error) {
+        console.error(`Error updating ${contentType}:`, error);
+        return false;
+      }
     } else {
       // Insert new record
-      console.log(`Creating new ${contentType} record`);
-      result = await supabase
+      const { error } = await supabase
         .from('cms_content')
-        .insert({ content_type: contentType, data: jsonSafeData });
+        .insert({ content_type: contentType, data });
+      
+      if (error) {
+        console.error(`Error inserting ${contentType}:`, error);
+        return false;
+      }
     }
     
-    if (result.error) {
-      console.error(`Error saving ${contentType}:`, result.error);
-      return false;
-    }
-    
-    console.log(`Successfully saved ${contentType}`);
     return true;
   } catch (error) {
     console.error(`Error updating ${contentType}:`, error);
@@ -98,7 +75,6 @@ export async function updateContent(contentType: ContentType, data: any): Promis
  */
 export async function initializeContent() {
   try {
-    console.log('Initializing all CMS content from Supabase');
     const { data, error } = await supabase
       .from('cms_content')
       .select('content_type, data');
@@ -110,13 +86,10 @@ export async function initializeContent() {
     
     // Transform array of records into an object keyed by content_type
     const contentMap: Record<string, any> = {};
-    if (data) {
-      data.forEach((item: any) => {
-        contentMap[item.content_type] = item.data;
-      });
-    }
+    data.forEach(item => {
+      contentMap[item.content_type] = item.data;
+    });
     
-    console.log('Initialized content map:', contentMap);
     return contentMap;
   } catch (error) {
     console.error('Error initializing content:', error);
@@ -131,16 +104,13 @@ export const mediaService = {
   /**
    * Upload a file to the media bucket
    */
-  async uploadFile(file: File): Promise<{ url: string; name: string; id: string; storagePath: string } | null> {
+  async uploadFile(file: File): Promise<{ url: string; name: string; id: string } | null> {
     try {
       const fileName = `${Date.now()}_${file.name}`;
-      const filePath = `${fileName}`;
-      
-      console.log(`Uploading file ${file.name} to media storage`);
       
       const { data, error } = await supabase.storage
         .from('media')
-        .upload(filePath, file);
+        .upload(fileName, file);
       
       if (error) {
         console.error('Error uploading file:', error);
@@ -150,15 +120,12 @@ export const mediaService = {
       // Get the public URL
       const { data: { publicUrl } } = supabase.storage
         .from('media')
-        .getPublicUrl(filePath);
-      
-      console.log(`File uploaded successfully. Public URL: ${publicUrl}`);
+        .getPublicUrl(fileName);
       
       return {
         url: publicUrl,
         name: file.name,
-        id: `${Date.now()}`,
-        storagePath: filePath,
+        id: data.path,
       };
     } catch (error) {
       console.error('Error uploading file:', error);
@@ -171,13 +138,6 @@ export const mediaService = {
    */
   async deleteFile(path: string): Promise<boolean> {
     try {
-      if (!path) {
-        console.error('No path provided for file deletion');
-        return false;
-      }
-      
-      console.log(`Deleting file: ${path}`);
-      
       const { error } = await supabase.storage
         .from('media')
         .remove([path]);
@@ -187,50 +147,10 @@ export const mediaService = {
         return false;
       }
       
-      console.log('File deleted successfully');
       return true;
     } catch (error) {
       console.error('Error deleting file:', error);
       return false;
-    }
-  },
-  
-  /**
-   * List all files in the media bucket
-   */
-  async listFiles(): Promise<MediaAsset[]> {
-    try {
-      console.log('Listing all files in media storage');
-      
-      const { data, error } = await supabase.storage
-        .from('media')
-        .list();
-      
-      if (error) {
-        console.error('Error listing files:', error);
-        return [];
-      }
-      
-      const assets: MediaAsset[] = data.map(file => {
-        const { data: { publicUrl } } = supabase.storage
-          .from('media')
-          .getPublicUrl(file.name);
-          
-        return {
-          id: file.id,
-          name: file.name,
-          url: publicUrl,
-          type: file.metadata?.mimetype?.startsWith('image/') ? 'image' : 'video',
-          uploadedAt: file.created_at,
-          storagePath: file.name
-        };
-      });
-      
-      console.log(`Found ${assets.length} files in storage`);
-      return assets;
-    } catch (error) {
-      console.error('Error listing files:', error);
-      return [];
     }
   }
 };
