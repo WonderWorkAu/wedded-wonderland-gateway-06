@@ -34,10 +34,10 @@ const HeroSection = () => {
     <div className="relative min-h-screen flex items-center overflow-hidden" style={{ fontFamily: globalStyles.fontFamily }}>
       {/* Background layers */}
       <div className="absolute inset-0 bg-wedding-white">
-        {/* Background video when available */}
+        {/* Background video if available */}
         {heroContent.backgroundVideo && (
           <div className="absolute inset-0 w-full h-full overflow-hidden">
-            {/* Video element - must remain at full opacity for visibility */}
+            {/* Video element - always at full opacity */}
             <video
               autoPlay
               muted
@@ -49,7 +49,7 @@ const HeroSection = () => {
               Your browser does not support the video tag.
             </video>
             
-            {/* Separate overlay with controlled opacity */}
+            {/* Separate video overlay with controlled opacity */}
             <div 
               className="absolute inset-0" 
               style={{ 
@@ -60,8 +60,8 @@ const HeroSection = () => {
           </div>
         )}
         
-        {/* Background image as fallback only if no video is available */}
-        {!heroContent.backgroundVideo && heroContent.backgroundImage && (
+        {/* Background image as fallback or overlay */}
+        {heroContent.backgroundImage && (
           <div className="absolute inset-0">
             {/* Image at full opacity */}
             <div 
