@@ -19,8 +19,6 @@ interface CmsContent<T> {
  */
 export async function fetchContent<T>(contentType: ContentType): Promise<T | null> {
   try {
-    console.log(`Fetching ${contentType} from Supabase...`);
-    
     const { data, error } = await supabase
       .from('cms_content')
       .select('data')
@@ -32,10 +30,9 @@ export async function fetchContent<T>(contentType: ContentType): Promise<T | nul
       return null;
     }
     
-    console.log(`Successfully fetched ${contentType}:`, data?.data);
     return data?.data as T || null;
   } catch (error) {
-    console.error(`Exception fetching ${contentType}:`, error);
+    console.error(`Error fetching ${contentType}:`, error);
     return null;
   }
 }
@@ -44,14 +41,9 @@ export async function fetchContent<T>(contentType: ContentType): Promise<T | nul
  * Update content in Supabase
  * This function accepts any data type and safely converts it to JSON
  */
-export async function updateContent<T>(contentType: ContentType, data: T): Promise<boolean> {
+export async function updateContent(contentType: ContentType, data: any): Promise<boolean> {
   try {
-    console.log(`Preparing to update ${contentType} with data:`, data);
-    
-    if (!data) {
-      console.error(`Cannot update ${contentType} with null or undefined data`);
-      return false;
-    }
+    console.log(`Updating ${contentType} with data:`, data);
     
     // First check if the content exists
     const { data: existingData, error: queryError } = await supabase
@@ -65,54 +57,37 @@ export async function updateContent<T>(contentType: ContentType, data: T): Promi
       return false;
     }
     
-    // Create a clean copy of the data by serializing and deserializing
-    // This removes any circular references or non-JSON values
-    const jsonSafeData = JSON.parse(JSON.stringify(data)) as Json;
-    
-    // Additional validation to ensure the data is properly formatted
-    if (!jsonSafeData) {
-      console.error(`Failed to create JSON-safe data for ${contentType}`);
-      return false;
-    }
-    
-    console.log(`Sanitized data for ${contentType}:`, jsonSafeData);
+    // Convert the data to a plain object to ensure it's JSON compatible
+    // This is crucial for handling complex objects with methods or circular references
+    const jsonSafeData = JSON.parse(JSON.stringify(data));
+    console.log(`Converted data for ${contentType}:`, jsonSafeData);
     
     let result;
     
     if (existingData) {
       // Update existing record
-      console.log(`Updating existing ${contentType} record with ID: ${existingData.id}`);
+      console.log(`Updating existing ${contentType} record`);
       result = await supabase
         .from('cms_content')
-        .update({ 
-          data: jsonSafeData,
-          updated_at: new Date().toISOString()
-        })
+        .update({ data: jsonSafeData })
         .eq('content_type', contentType);
     } else {
       // Insert new record
       console.log(`Creating new ${contentType} record`);
       result = await supabase
         .from('cms_content')
-        .insert({ 
-          content_type: contentType, 
-          data: jsonSafeData,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
+        .insert({ content_type: contentType, data: jsonSafeData });
     }
     
     if (result.error) {
       console.error(`Error saving ${contentType}:`, result.error);
-      console.error('Full data that failed:', jsonSafeData);
       return false;
     }
     
-    console.log(`Successfully saved ${contentType} to Supabase`);
+    console.log(`Successfully saved ${contentType}`);
     return true;
   } catch (error) {
-    console.error(`Exception updating ${contentType}:`, error);
-    console.error('Data that failed:', data);
+    console.error(`Error updating ${contentType}:`, error);
     return false;
   }
 }
@@ -135,20 +110,13 @@ export async function initializeContent() {
     
     // Transform array of records into an object keyed by content_type
     const contentMap: Record<string, any> = {};
-    if (data && data.length > 0) {
+    if (data) {
       data.forEach((item: any) => {
-        if (item && item.content_type && item.data) {
-          contentMap[item.content_type] = item.data;
-          console.log(`Loaded content type: ${item.content_type} with data:`, item.data);
-        } else {
-          console.warn('Found incomplete data item:', item);
-        }
+        contentMap[item.content_type] = item.data;
       });
-      console.log('Initialized content map from Supabase:', contentMap);
-    } else {
-      console.log('No content found in Supabase, using default values');
     }
     
+    console.log('Initialized content map:', contentMap);
     return contentMap;
   } catch (error) {
     console.error('Error initializing content:', error);

@@ -11,7 +11,6 @@ import Footer from '@/components/Footer';
 import { useCMSStore, initializeCMSFromSupabase } from '@/store/cmsStore';
 import { useStylingStore } from '@/store/stylingStore';
 import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
   // Get stores
@@ -23,7 +22,6 @@ const Index = () => {
   const [version, setVersion] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
   const initialLoadDone = useRef(false);
   
   // Initialize content from Supabase when component mounts
@@ -40,28 +38,15 @@ const Index = () => {
           
           if (success) {
             console.log("CMS data initialized from Supabase");
-            
-            // Verify the hero content was loaded properly
-            const heroContent = cmsStore.heroContent;
-            console.log("Hero content after initialization:", heroContent);
+            setVersion(v => v + 1);
             
             toast({
               title: "Content Updated",
               description: "The latest content has been loaded from the CMS",
             });
-
-            // Force a re-render after content is loaded
-            setVersion(v => v + 1);
           } else {
             console.log("Using default content since Supabase initialization failed");
             // Even on failure, we should proceed with default content
-            toast({
-              title: "Using Default Content",
-              description: "Could not load content from the CMS, using default values",
-              variant: "default"
-            });
-            
-            // Force a re-render with default content
             setVersion(v => v + 1);
           }
         } catch (error) {
@@ -73,9 +58,6 @@ const Index = () => {
             description: "There was an issue loading the latest content",
             variant: "destructive"
           });
-          
-          // Force a re-render with default content
-          setVersion(v => v + 1);
         } finally {
           setLoading(false);
           initialLoadDone.current = true;
@@ -84,37 +66,6 @@ const Index = () => {
     };
     
     initializeCMS();
-  }, [toast, retryCount, cmsStore]);
-  
-  // Set up listener for Supabase realtime updates to refresh content
-  useEffect(() => {
-    // Listen for updates to the cms_content table
-    const subscription = supabase
-      .channel('cms_changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'cms_content' },
-        (payload) => {
-          console.log('CMS content changed:', payload);
-          // Refresh CMS data when changes occur
-          if (initialLoadDone.current) {
-            initializeCMSFromSupabase().then(() => {
-              setVersion(v => v + 1);
-              toast({
-                title: "Content Updated",
-                description: "The content has been refreshed from the CMS",
-                variant: "default"
-              });
-            });
-          }
-        }
-      )
-      .subscribe();
-
-    // Clean up subscription on unmount
-    return () => {
-      supabase.removeChannel(subscription);
-    };
   }, [toast]);
   
   // Apply custom CSS
@@ -141,13 +92,6 @@ const Index = () => {
       }
     };
   }, [stylingStore.globalStyles.customCSS]);
-  
-  // Handler for manual retry
-  const handleRetry = () => {
-    initialLoadDone.current = false;
-    setRetryCount(prev => prev + 1);
-    setError(null);
-  };
 
   // Use a key based on version to force full re-render when data changes
   return (
@@ -170,7 +114,7 @@ const Index = () => {
             <p className="text-red-700 mb-4">{error}</p>
             <button 
               className="px-4 py-2 bg-wedding-black text-white rounded hover:bg-wedding-dark-gray"
-              onClick={handleRetry}
+              onClick={() => window.location.reload()}
             >
               Retry
             </button>

@@ -5,7 +5,7 @@ import { updateContent } from '@/services/cmsService';
 
 export interface HeroSlice {
   heroContent: HeroContent;
-  updateHeroContent: (content: Partial<HeroContent>) => Promise<boolean>;
+  updateHeroContent: (content: HeroContent) => void;
 }
 
 const initialHeroContent: HeroContent = {
@@ -18,40 +18,15 @@ const initialHeroContent: HeroContent = {
   backgroundImage: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2070",
 };
 
-export const createHeroSlice: StateCreator<HeroSlice> = (set, get) => ({
+export const createHeroSlice: StateCreator<HeroSlice> = (set) => ({
   heroContent: initialHeroContent,
-  updateHeroContent: async (content) => {
+  updateHeroContent: (content) => {
     console.log("Store updating hero content with:", content);
-    
-    let success = false;
-    
-    // Make sure we have a complete hero content object by merging with current state
     set((state) => {
       const updatedContent = { ...state.heroContent, ...content };
-      
-      // Log the full content that will be saved
-      console.log("Full hero content to be saved:", updatedContent);
-      
+      // Sync with Supabase
+      updateContent('heroContent', updatedContent);
       return { heroContent: updatedContent };
     });
-    
-    // Get the updated content from the store after the state update
-    const currentContent = get().heroContent;
-    
-    // Sync with Supabase using async/await for better error handling
-    try {
-      success = await updateContent('heroContent', currentContent);
-      
-      if (!success) {
-        console.error("Failed to update hero content in Supabase");
-      } else {
-        console.log("Successfully updated hero content in Supabase:", currentContent);
-      }
-    } catch (error) {
-      console.error("Exception during hero content update:", error);
-      success = false;
-    }
-    
-    return success;
   },
 });

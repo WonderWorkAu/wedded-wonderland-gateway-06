@@ -1,116 +1,46 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { useCMSStore, verifyContentType, HeroContent } from '@/store/cmsStore';
+import { useCMSStore } from '@/store/cmsStore';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Image, Film, Save, CheckCircle, AlertCircle } from 'lucide-react';
+import { Image, Film } from 'lucide-react';
 
 const HeroEditor = () => {
   const { heroContent, updateHeroContent, mediaAssets } = useCMSStore();
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({
-    mainHeading: "",
-    subHeading: "",
-    quote: "",
-    ctaText: "",
-    footerText: "",
-    backgroundImage: "",
-    backgroundVideo: "",
+    mainHeading: heroContent.mainHeading || "Your Craft Is World-Class. Your Visibility Should Be Too.",
+    subHeading: heroContent.subHeading || "Join the exclusive network reaching 10M+ monthly couples across 54+ countries who are actively searching for exceptional wedding professionals like you.",
+    quote: heroContent.quote || "You've mastered your craft. Now it's time to master your market.",
+    ctaText: heroContent.ctaText || "BECOME A WEDDED PARTNER",
+    footerText: heroContent.footerText || "*Limited memberships available for 2025",
+    backgroundImage: heroContent.backgroundImage || "",
+    backgroundVideo: heroContent.backgroundVideo || "",
   });
-
-  const [saving, setSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState<boolean | null>(null);
-
-  // Initialize form data from store whenever heroContent changes
-  useEffect(() => {
-    console.log("Initializing form with hero content:", heroContent);
-    setFormData({
-      mainHeading: heroContent.mainHeading || "",
-      subHeading: heroContent.subHeading || "",
-      quote: heroContent.quote || "",
-      ctaText: heroContent.ctaText || "",
-      footerText: heroContent.footerText || "",
-      backgroundImage: heroContent.backgroundImage || "",
-      backgroundVideo: heroContent.backgroundVideo || "",
-    });
-  }, [heroContent]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    console.log(`Changing ${name} to ${value}`);
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
-    setSaveSuccess(null);
+    updateHeroContent(formData);
     
-    console.log("Submitting form with data:", formData);
+    // Log the updated data for debugging
+    console.log("Updating hero content with:", formData);
     
-    // Make sure we don't accidentally send empty strings if values weren't changed
-    const updatedContent = { ...formData };
-    
-    // Remove any properties with empty strings so they don't override existing values
-    Object.keys(updatedContent).forEach(key => {
-      if (updatedContent[key as keyof typeof updatedContent] === "") {
-        delete updatedContent[key as keyof typeof updatedContent];
-      }
+    toast({
+      title: "Changes saved",
+      description: "Your hero section has been updated",
     });
-    
-    console.log("Filtered data to update:", updatedContent);
-    
-    try {
-      const success = await updateHeroContent(updatedContent);
-      setSaveSuccess(success);
-      
-      if (success) {
-        toast({
-          title: "Changes saved",
-          description: "Your hero section has been updated",
-        });
-        
-        // Verify the data was saved by fetching it directly from Supabase
-        setTimeout(async () => {
-          const verifiedData = await verifyContentType('heroContent') as HeroContent | null;
-          console.log("Verification of saved hero content:", verifiedData);
-          
-          if (verifiedData && updatedContent.backgroundVideo && 
-              verifiedData.backgroundVideo !== updatedContent.backgroundVideo) {
-            console.warn("Background video may not have saved correctly. DB value:", verifiedData.backgroundVideo);
-            toast({
-              title: "Warning",
-              description: "Background video URL might not have saved correctly. Please check and try again.",
-              variant: "destructive"
-            });
-          }
-        }, 1000);
-      } else {
-        toast({
-          title: "Error saving changes",
-          description: "There was a problem updating the hero section",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error("Error saving hero content:", error);
-      setSaveSuccess(false);
-      toast({
-        title: "Error saving changes",
-        description: "There was a problem updating the hero section",
-        variant: "destructive"
-      });
-    } finally {
-      setSaving(false);
-    }
   };
   
   const selectMedia = (url: string, type: 'image' | 'video') => {
@@ -335,14 +265,6 @@ const HeroEditor = () => {
                     src={formData.backgroundVideo} 
                     controls
                     className="w-full h-full object-contain"
-                    onError={(e) => {
-                      console.error("Error loading video:", e);
-                      toast({
-                        title: "Video Error",
-                        description: "The video URL appears to be invalid or inaccessible",
-                        variant: "destructive"
-                      });
-                    }}
                   />
                 </div>
               ) : (
@@ -358,12 +280,6 @@ const HeroEditor = () => {
                 placeholder="Or paste video URL here"
                 className="rounded-none border-wedding-black text-sm"
               />
-              
-              {formData.backgroundVideo && (
-                <p className="text-xs mt-2 text-wedding-dark-gray">
-                  Make sure the video URL is publicly accessible and directly playable
-                </p>
-              )}
             </div>
           </div>
         </div>
@@ -371,37 +287,10 @@ const HeroEditor = () => {
         <div className="pt-4">
           <Button 
             type="submit"
-            className="bg-wedding-black text-wedding-white hover:bg-wedding-dark-gray rounded-none flex items-center gap-2"
-            disabled={saving}
+            className="bg-wedding-black text-wedding-white hover:bg-wedding-dark-gray rounded-none"
           >
-            {saving ? (
-              <>
-                <div className="w-4 h-4 border-2 border-wedding-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save size={16} />
-                Save Changes
-              </>
-            )}
+            Save Changes
           </Button>
-          
-          {saveSuccess !== null && (
-            <div className={`mt-4 p-3 ${saveSuccess ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'} rounded-md flex items-center`}>
-              {saveSuccess ? (
-                <>
-                  <CheckCircle size={18} className="mr-2 text-green-600" />
-                  Changes saved successfully
-                </>
-              ) : (
-                <>
-                  <AlertCircle size={18} className="mr-2 text-red-600" />
-                  Failed to save changes. Please try again.
-                </>
-              )}
-            </div>
-          )}
         </div>
       </form>
     </div>

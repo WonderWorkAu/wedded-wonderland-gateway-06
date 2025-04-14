@@ -15,58 +15,42 @@ const HeroSection = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   
   console.log("Hero content in component:", heroContent);
   console.log("Hero styles in component:", heroStyles);
   
-  // Update video URL when backgroundVideo changes
+  // Force video reload when component mounts or when URL changes
   useEffect(() => {
-    if (heroContent?.backgroundVideo) {
-      console.log("Setting video URL from hero content:", heroContent.backgroundVideo);
-      // Add cache-busting timestamp to force reload
+    if (videoRef.current && heroContent.backgroundVideo) {
       const timestamp = Date.now();
-      const url = heroContent.backgroundVideo.includes('?') 
+      const videoUrl = heroContent.backgroundVideo.includes('?') 
         ? `${heroContent.backgroundVideo}&_=${timestamp}`
         : `${heroContent.backgroundVideo}?_=${timestamp}`;
-      setVideoUrl(url);
-      setVideoError(false);
-    } else {
-      console.log("No backgroundVideo found in hero content");
-      setVideoUrl(null);
-    }
-  }, [heroContent?.backgroundVideo]);
-  
-  // Force video reload when URL changes
-  useEffect(() => {
-    if (videoRef.current && videoUrl) {
-      console.log("Loading video from URL:", videoUrl);
-      setVideoLoaded(false);
       
-      // Set the src directly on the video element
-      videoRef.current.src = videoUrl;
-      videoRef.current.load();
+      // Set the src attribute with cache busting
+      const sourceElement = videoRef.current.querySelector('source');
+      if (sourceElement) {
+        sourceElement.setAttribute('src', videoUrl);
+        videoRef.current.load();
+        
+        // Reset states
+        setVideoLoaded(false);
+        setVideoError(false);
+      }
     }
-  }, [videoUrl]);
+  }, [heroContent.backgroundVideo]);
   
   // Handle video events
   const handleVideoLoaded = () => {
     setVideoLoaded(true);
     setVideoError(false);
     console.log("Video loaded successfully");
-    
-    // Start playing the video
-    if (videoRef.current) {
-      videoRef.current.play().catch(err => {
-        console.warn("Auto-play prevented:", err);
-      });
-    }
   };
   
   const handleVideoError = () => {
     setVideoError(true);
     setVideoLoaded(false);
-    console.error("Error loading video from URL:", videoUrl);
+    console.error("Error loading video from URL:", heroContent.backgroundVideo);
   };
   
   const handleScrollToPricing = () => {
@@ -88,7 +72,7 @@ const HeroSection = () => {
       {/* Background layers */}
       <div className="absolute inset-0 bg-wedding-white">
         {/* Background video when available */}
-        {videoUrl && (
+        {heroContent.backgroundVideo && (
           <div className="absolute inset-0 w-full h-full overflow-hidden">
             {/* Video element - must remain at full opacity for visibility */}
             <video
@@ -100,7 +84,10 @@ const HeroSection = () => {
               className="absolute min-w-full min-h-full object-cover w-auto h-auto top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
               onLoadedData={handleVideoLoaded}
               onError={handleVideoError}
-            />
+            >
+              <source src={`${heroContent.backgroundVideo}?_=${Date.now()}`} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
             
             {/* Separate overlay with controlled opacity */}
             <div 
@@ -114,7 +101,7 @@ const HeroSection = () => {
         )}
         
         {/* Background image as fallback only if no video is available or video failed to load */}
-        {(!videoUrl || videoError) && heroContent?.backgroundImage && (
+        {(!heroContent.backgroundVideo || videoError) && heroContent.backgroundImage && (
           <div className="absolute inset-0">
             {/* Image at full opacity */}
             <div 
@@ -146,7 +133,7 @@ const HeroSection = () => {
           </div>
           
           <h1 className={`${getFontSize(heroStyles.headingFontSize)} font-light text-wedding-black mb-6 md:mb-8 leading-tight tracking-tight`}>
-            {heroContent?.mainHeading?.split(' ').map((word, index, array) => {
+            {heroContent.mainHeading?.split(' ').map((word, index, array) => {
               // Apply styling to "World-Class" and "Visibility"
               if (word === "World-Class." || word === "Visibility") {
                 return <span key={index} className="bw-gradient font-semibold">{word} </span>;
@@ -160,12 +147,12 @@ const HeroSection = () => {
           </h1>
           
           <p className={`${getFontSize(heroStyles.subheadingFontSize)} text-wedding-dark-gray mb-8 max-w-3xl`}>
-            {heroContent?.subHeading}
+            {heroContent.subHeading}
           </p>
           
           <div className="mb-10 md:mb-12 py-4 md:py-6 px-6 md:px-8 bg-wedding-black rounded-none">
             <p className={`${getFontSize(heroStyles.quoteFontSize)} italic text-wedding-white font-light`}>
-              "{heroContent?.quote}"
+              "{heroContent.quote}"
             </p>
           </div>
           
@@ -177,12 +164,12 @@ const HeroSection = () => {
               color: globalStyles.secondaryColor
             }}
           >
-            <span className="font-semibold">{heroContent?.ctaText}</span>
+            <span className="font-semibold">{heroContent.ctaText}</span>
             <ArrowRight className="transition-transform duration-300 group-hover:translate-x-1" size={20} />
           </Button>
           
           <p className="mt-6 text-xs md:text-sm text-wedding-dark-gray italic">
-            {heroContent?.footerText}
+            {heroContent.footerText}
           </p>
         </div>
       </div>
