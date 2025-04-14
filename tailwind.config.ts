@@ -102,17 +102,12 @@ export default {
 					to: {
 						backgroundPosition: '-200% 0'
 					}
-				},
-				'scroll': {
-					'0%': { transform: 'translateX(0)' },
-					'100%': { transform: 'translateX(-50%)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'shimmer': 'shimmer 2s linear infinite',
-				'scroll': 'scroll 30s linear infinite'
+				'shimmer': 'shimmer 2s linear infinite'
 			},
 			backgroundImage: {
 				'gradient-bw': 'linear-gradient(45deg, #000000 0%, #333333 50%, #000000 100%)'
