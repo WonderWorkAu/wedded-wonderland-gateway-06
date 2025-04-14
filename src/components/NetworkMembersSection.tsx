@@ -48,27 +48,27 @@ const memberCategories = [
 
 const NetworkMembersSection = () => {
   return (
-    <div className="section-padding bg-black">
+    <div className="section-padding bg-wedding-light-purple/5">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 max-w-3xl mx-auto">
-          <Badge className="mb-4 px-3 py-1 bg-wedding-gold/20 text-wedding-gold border-wedding-gold/30 backdrop-blur-sm">
+          <Badge className="mb-4 px-3 py-1 bg-wedding-deep-purple/10 text-wedding-deep-purple border-wedding-deep-purple/30 backdrop-blur-sm">
             Industry Leaders
           </Badge>
           <h2 className="wedded-title text-4xl md:text-5xl mb-4">Who Belongs in the Network</h2>
           <div className="w-24 h-1 bg-wedding-gold mx-auto mb-6"></div>
-          <p className="text-lg text-gray-300">
+          <p className="text-lg text-gray-700">
             The Wedded Network is a global collective of the most talented, trusted, and forward-thinking professionals in weddings, events, and celebrations. If you're elevating the industry through excellence, innovation, or inspiration — you belong here.
           </p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {memberCategories.map((category, index) => (
-            <div key={index} className="bg-card p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-white/10">
-              <div className="bg-white/10 p-4 rounded-full inline-flex text-wedding-gold mb-4">
+            <div key={index} className="bg-white p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 border border-gray-100">
+              <div className="bg-wedding-light-purple/20 p-4 rounded-full inline-flex text-wedding-deep-purple mb-4">
                 {category.icon}
               </div>
-              <h3 className="font-semibold text-xl mb-3 text-wedding-gold">{category.title}</h3>
-              <p className="text-gray-300 text-sm">{category.description}</p>
+              <h3 className="font-semibold text-xl mb-3 text-wedding-deep-purple">{category.title}</h3>
+              <p className="text-gray-600 text-sm">{category.description}</p>
             </div>
           ))}
         </div>
