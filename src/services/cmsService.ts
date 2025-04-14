@@ -6,6 +6,14 @@ import { Json } from '@/integrations/supabase/types';
 // Define content types for type safety
 export type ContentType = 'heroContent' | 'statsContent' | 'benefitsContent' | 'networkContent' | 'testimonials' | 'mediaAssets';
 
+interface CmsContent<T> {
+  id: string;
+  content_type: ContentType;
+  data: T;
+  created_at: string;
+  updated_at: string;
+}
+
 /**
  * Fetch content from Supabase by content type
  */
@@ -24,13 +32,8 @@ export async function fetchContent<T>(contentType: ContentType): Promise<T | nul
       return null;
     }
     
-    if (!data || !data.data) {
-      console.warn(`No data found for ${contentType}`);
-      return null;
-    }
-    
-    console.log(`Successfully fetched ${contentType}:`, data.data);
-    return data.data as T;
+    console.log(`Successfully fetched ${contentType}:`, data?.data);
+    return data?.data as T || null;
   } catch (error) {
     console.error(`Exception fetching ${contentType}:`, error);
     return null;
@@ -64,16 +67,7 @@ export async function updateContent<T>(contentType: ContentType, data: T): Promi
     
     // Create a clean copy of the data by serializing and deserializing
     // This removes any circular references or non-JSON values
-    let jsonSafeData: Json;
-    try {
-      // First convert to string
-      const jsonString = JSON.stringify(data);
-      // Then parse back to object
-      jsonSafeData = JSON.parse(jsonString) as Json;
-    } catch (e) {
-      console.error(`Failed to serialize data for ${contentType}:`, e);
-      return false;
-    }
+    const jsonSafeData = JSON.parse(JSON.stringify(data)) as Json;
     
     // Additional validation to ensure the data is properly formatted
     if (!jsonSafeData) {
@@ -94,8 +88,7 @@ export async function updateContent<T>(contentType: ContentType, data: T): Promi
           data: jsonSafeData,
           updated_at: new Date().toISOString()
         })
-        .eq('content_type', contentType)
-        .select();
+        .eq('content_type', contentType);
     } else {
       // Insert new record
       console.log(`Creating new ${contentType} record`);
@@ -106,8 +99,7 @@ export async function updateContent<T>(contentType: ContentType, data: T): Promi
           data: jsonSafeData,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        })
-        .select();
+        });
     }
     
     if (result.error) {
@@ -116,12 +108,7 @@ export async function updateContent<T>(contentType: ContentType, data: T): Promi
       return false;
     }
     
-    if (result.data && result.data.length > 0) {
-      console.log(`Successfully saved ${contentType} to Supabase with result:`, result.data[0]);
-    } else {
-      console.log(`Successfully saved ${contentType} to Supabase`);
-    }
-    
+    console.log(`Successfully saved ${contentType} to Supabase`);
     return true;
   } catch (error) {
     console.error(`Exception updating ${contentType}:`, error);

@@ -29,6 +29,8 @@ export type CMSStore =
   MediaSlice;
 
 // Create the store with persist middleware
+// We're still using persist for offline capability and faster initial loads
+// But we'll sync with Supabase whenever possible
 export const useCMSStore = create<CMSStore>()(
   persist(
     (...a) => ({
@@ -40,8 +42,8 @@ export const useCMSStore = create<CMSStore>()(
       ...createMediaSlice(...a),
     }),
     {
-      name: 'wedded-cms-storage',
-      version: 2, // Increment version to force re-hydration
+      name: 'wedded-cms-storage', // keep the same storage key for backward compatibility
+      version: 1,
       partialize: (state) => ({
         heroContent: state.heroContent,
         statsContent: state.statsContent,
@@ -50,6 +52,7 @@ export const useCMSStore = create<CMSStore>()(
         testimonials: state.testimonials,
         mediaAssets: state.mediaAssets,
       }),
+      // Add an onRehydrate callback to sync with Supabase after loading from localStorage
       onRehydrateStorage: () => {
         return (rehydratedState, error) => {
           if (error) {
@@ -59,6 +62,7 @@ export const useCMSStore = create<CMSStore>()(
           
           if (rehydratedState) {
             console.log('Store rehydrated from localStorage');
+            // We'll let initializeCMSFromSupabase handle the syncing now
           }
         };
       },
@@ -67,6 +71,8 @@ export const useCMSStore = create<CMSStore>()(
 );
 
 // Initialize content from Supabase on app start
+// This is separate from the onRehydrateStorage callback to handle cases where
+// the localStorage is empty or corrupted
 export const initializeCMSFromSupabase = async () => {
   console.log('Initializing CMS from Supabase...');
   
@@ -81,34 +87,34 @@ export const initializeCMSFromSupabase = async () => {
     const store = useCMSStore.getState();
     let contentUpdated = false;
     
-    // Update each content type if available with mandatory strict typing
+    // Update each content type if available
     if (contentMap.heroContent) {
       console.log('Setting heroContent from Supabase:', contentMap.heroContent);
-      await store.updateHeroContent(contentMap.heroContent);
+      store.updateHeroContent(contentMap.heroContent);
       contentUpdated = true;
     }
     
     if (contentMap.statsContent) {
       console.log('Setting statsContent from Supabase:', contentMap.statsContent);
-      await store.updateStatsContent(contentMap.statsContent);
+      store.updateStatsContent(contentMap.statsContent);
       contentUpdated = true;
     }
     
     if (contentMap.benefitsContent) {
       console.log('Setting benefitsContent from Supabase:', contentMap.benefitsContent);
-      await store.updateBenefitsContent(contentMap.benefitsContent);
+      store.updateBenefitsContent(contentMap.benefitsContent);
       contentUpdated = true;
     }
     
     if (contentMap.networkContent) {
       console.log('Setting networkContent from Supabase:', contentMap.networkContent);
-      await store.updateNetworkContent(contentMap.networkContent);
+      store.updateNetworkContent(contentMap.networkContent);
       contentUpdated = true;
     }
     
     if (contentMap.testimonials) {
       console.log('Setting testimonials from Supabase:', contentMap.testimonials);
-      await store.updateTestimonials(contentMap.testimonials);
+      store.updateTestimonials(contentMap.testimonials);
       contentUpdated = true;
     }
     
@@ -125,26 +131,15 @@ export const initializeCMSFromSupabase = async () => {
   }
 };
 
-// Add a function to manually verify a specific content type with proper return typing
-export const verifyContentType = async <T>(contentType: string): Promise<T | null> => {
+// Add a function to manually verify a specific content type
+export const verifyContentType = async (contentType: string) => {
   try {
     console.log(`Manually verifying ${contentType} content...`);
-    const data = await fetchContent<T>(contentType as any);
+    const data = await fetchContent(contentType as any);
     console.log(`Verification result for ${contentType}:`, data);
     return data;
   } catch (error) {
     console.error(`Error verifying ${contentType}:`, error);
     return null;
   }
-};
-
-// Force refresh CMS data from Supabase
-export const refreshCMSFromSupabase = async () => {
-  console.log('Force refreshing CMS data from Supabase...');
-  
-  // Clear local storage to prevent conflicts
-  localStorage.removeItem('wedded-cms-storage');
-  
-  // Re-initialize from Supabase
-  return await initializeCMSFromSupabase();
 };
