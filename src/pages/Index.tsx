@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect } from 'react';
 import HeroSection from '@/components/HeroSection';
 import StatsBar from '@/components/StatsBar';
 import BenefitsSection from '@/components/BenefitsSection';
@@ -8,57 +8,38 @@ import PricingTables from '@/components/PricingTables';
 import TestimonialsSection from '@/components/TestimonialsSection';
 import CtaSection from '@/components/CtaSection';
 import Footer from '@/components/Footer';
-import { useCMSStore, initializeCMSFromSupabase } from '@/store/cmsStore';
+import { useCMSStore } from '@/store/cmsStore';
 import { useStylingStore } from '@/store/stylingStore';
-import { useToast } from '@/components/ui/use-toast';
 
 const Index = () => {
   // Get stores
   const cmsStore = useCMSStore();
   const stylingStore = useStylingStore();
-  const { toast } = useToast();
   
-  // Add a version state to force component updates when CMS data changes
-  const [version, setVersion] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const initialLoadDone = useRef(false);
-  
-  // Initialize content from Supabase when component mounts
+  // Re-hydrate the stores on page load to ensure latest data
+  // Only run this once when the component mounts, not on every render
   useEffect(() => {
-    const initializeCMS = async () => {
-      if (!initialLoadDone.current) {
-        console.log("Initializing CMS data - one time operation");
-        setLoading(true);
-        
-        try {
-          // Initialize from Supabase
-          const success = await initializeCMSFromSupabase();
-          
-          if (success) {
-            console.log("CMS data initialized from Supabase");
-            setVersion(v => v + 1);
-            
-            toast({
-              title: "Content Updated",
-              description: "The latest content has been loaded from the CMS",
-            });
-          }
-        } catch (error) {
-          console.error("Error initializing CMS data:", error);
-          toast({
-            title: "Error Loading Content",
-            description: "There was an issue loading the latest content",
-            variant: "destructive"
-          });
-        } finally {
-          setLoading(false);
-          initialLoadDone.current = true;
-        }
+    // This will only run once on initial page load
+    const rehydrateStores = () => {
+      console.log("Rehydrating stores - one time operation");
+      
+      // Only trigger updates if the data actually changed
+      // This avoids unnecessary re-renders and update loops
+      const localHeroContent = JSON.parse(localStorage.getItem('wedded-cms-storage') || '{}')?.state?.heroContent;
+      const localGlobalStyles = JSON.parse(localStorage.getItem('wedded-styling-storage') || '{}')?.state?.globalStyles;
+      
+      if (localHeroContent && JSON.stringify(localHeroContent) !== JSON.stringify(cmsStore.heroContent)) {
+        cmsStore.updateHeroContent(localHeroContent);
+      }
+      
+      if (localGlobalStyles && JSON.stringify(localGlobalStyles) !== JSON.stringify(stylingStore.globalStyles)) {
+        stylingStore.updateGlobalStyles(localGlobalStyles);
       }
     };
     
-    initializeCMS();
-  }, [toast]);
+    rehydrateStores();
+    // Empty dependency array ensures this only runs once on mount
+  }, []);
   
   // Apply custom CSS
   useEffect(() => {
@@ -85,33 +66,16 @@ const Index = () => {
     };
   }, [stylingStore.globalStyles.customCSS]);
 
-  // Use a key based on version to force full re-render when data changes
   return (
-    <div 
-      key={`page-container-${version}`}
-      className="min-h-screen" 
-      style={{ fontFamily: stylingStore.globalStyles.fontFamily }}
-      data-cms-version={version}
-    >
-      {loading ? (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="w-16 h-16 border-4 border-wedding-light-gray border-t-wedding-black rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-wedding-black">Loading content...</p>
-          </div>
-        </div>
-      ) : (
-        <>
-          <HeroSection />
-          <StatsBar />
-          <BenefitsSection />
-          <NetworkMembersSection />
-          <PricingTables />
-          <TestimonialsSection />
-          <CtaSection />
-          <Footer />
-        </>
-      )}
+    <div className="min-h-screen" style={{ fontFamily: stylingStore.globalStyles.fontFamily }}>
+      <HeroSection />
+      <StatsBar />
+      <BenefitsSection />
+      <NetworkMembersSection />
+      <PricingTables />
+      <TestimonialsSection />
+      <CtaSection />
+      <Footer />
     </div>
   );
 };
