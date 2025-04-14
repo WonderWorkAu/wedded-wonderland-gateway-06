@@ -1,28 +1,186 @@
 
-import React, { useState, useRef } from 'react';
-import { useCMSStore, refreshCMSFromSupabase } from '@/store/cmsStore';
+import React, { useEffect, useState, useRef } from 'react';
+import HeroSection from '@/components/HeroSection';
+import StatsBar from '@/components/StatsBar';
+import BenefitsSection from '@/components/BenefitsSection';
+import NetworkMembersSection from '@/components/NetworkMembersSection';
+import PricingTables from '@/components/PricingTables';
+import TestimonialsSection from '@/components/TestimonialsSection';
+import CtaSection from '@/components/CtaSection';
+import Footer from '@/components/Footer';
+import { useCMSStore, initializeCMSFromSupabase, refreshCMSFromSupabase } from '@/store/cmsStore';
 import { useStylingStore } from '@/store/stylingStore';
-import LoadingScreen from '@/components/LoadingScreen';
-import ErrorScreen from '@/components/ErrorScreen';
-import MainContent from '@/components/MainContent';
-import CMSInitializer from '@/components/CMSInitializer';
-import RealtimeUpdates from '@/components/RealtimeUpdates';
-import CustomCSSManager from '@/components/CustomCSSManager';
+import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
-  // Get styling store
+  // Get stores
+  const cmsStore = useCMSStore();
   const stylingStore = useStylingStore();
+  const { toast } = useToast();
   
-  // State
+  // Add a version state to force component updates when CMS data changes
   const [version, setVersion] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const initialLoadDone = useRef(false);
+  const dataLoadAttempts = useRef(0);
+  
+  // Initialize content from Supabase when component mounts
+  useEffect(() => {
+    const initializeCMS = async () => {
+      if (!initialLoadDone.current) {
+        console.log("Initializing CMS data - one time operation");
+        setLoading(true);
+        setError(null);
+        dataLoadAttempts.current += 1;
+        
+        try {
+          // First try to refresh CMS data from Supabase
+          let success = await refreshCMSFromSupabase();
+          
+          if (!success && dataLoadAttempts.current < 3) {
+            console.log(`Initialization attempt ${dataLoadAttempts.current} failed, retrying...`);
+            // Wait a moment before retrying
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            success = await refreshCMSFromSupabase();
+          }
+          
+          if (success) {
+            console.log("CMS data initialized from Supabase");
+            
+            // Verify the hero content was loaded properly
+            const heroContent = cmsStore.heroContent;
+            console.log("Hero content after initialization:", heroContent);
+            
+            toast({
+              title: "Content Updated",
+              description: "The latest content has been loaded from the CMS",
+            });
+
+            // Force a re-render after content is loaded
+            setVersion(v => v + 1);
+          } else {
+            console.log("Using default content since Supabase initialization failed");
+            // Even on failure, we should proceed with default content
+            toast({
+              title: "Using Default Content",
+              description: "Could not load content from the CMS, using default values",
+              variant: "default"
+            });
+            
+            // Force a re-render with default content
+            setVersion(v => v + 1);
+          }
+          
+          // Mark initialization as complete even if it failed
+          initialLoadDone.current = true;
+        } catch (error) {
+          console.error("Error initializing CMS data:", error);
+          setError("Failed to load content. Using default content instead.");
+          
+          toast({
+            title: "Error Loading Content",
+            description: "There was an issue loading the latest content",
+            variant: "destructive"
+          });
+          
+          // Force a re-render with default content
+          setVersion(v => v + 1);
+          
+          // Mark initialization as complete even if it failed
+          initialLoadDone.current = true;
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    initializeCMS();
+  }, [toast, retryCount]);
+  
+  // Set up listener for Supabase realtime updates to refresh content
+  useEffect(() => {
+    // Listen for updates to the cms_content table
+    const channel = supabase
+      .channel('cms_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'cms_content' },
+        async (payload) => {
+          console.log('CMS content changed:', payload);
+          
+          // Only refresh if initial load is complete
+          if (initialLoadDone.current) {
+            toast({
+              title: "Content Change Detected",
+              description: "Refreshing content from the CMS...",
+              variant: "default"
+            });
+            
+            // Refresh CMS data when changes occur
+            const success = await refreshCMSFromSupabase();
+            
+            if (success) {
+              setVersion(v => v + 1);
+              toast({
+                title: "Content Updated",
+                description: "The content has been refreshed from the CMS",
+                variant: "default"
+              });
+            } else {
+              toast({
+                title: "Refresh Failed",
+                description: "Could not refresh content from the CMS",
+                variant: "destructive"
+              });
+            }
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log("Realtime subscription status:", status);
+      });
+
+    // Clean up subscription on unmount
+    return () => {
+      console.log("Cleaning up Supabase realtime channel");
+      supabase.removeChannel(channel);
+    };
+  }, [toast]);
+  
+  // Apply custom CSS
+  useEffect(() => {
+    // Create a style element for custom CSS
+    const customCssElement = document.createElement('style');
+    customCssElement.id = 'wedded-custom-css';
+    customCssElement.textContent = stylingStore.globalStyles.customCSS;
+    
+    // Remove any existing custom CSS element
+    const existingCssElement = document.getElementById('wedded-custom-css');
+    if (existingCssElement) {
+      existingCssElement.remove();
+    }
+    
+    // Add the new custom CSS to the document head
+    document.head.appendChild(customCssElement);
+    
+    // Clean up on component unmount
+    return () => {
+      const cssElement = document.getElementById('wedded-custom-css');
+      if (cssElement) {
+        cssElement.remove();
+      }
+    };
+  }, [stylingStore.globalStyles.customCSS]);
   
   // Handler for manual retry
   const handleRetry = async () => {
     initialLoadDone.current = false;
+    dataLoadAttempts.current = 0;
     await refreshCMSFromSupabase();
+    setRetryCount(prev => prev + 1);
     setError(null);
   };
 
@@ -34,28 +192,36 @@ const Index = () => {
       style={{ fontFamily: stylingStore.globalStyles.fontFamily }}
       data-cms-version={version}
     >
-      {/* CMS Initializer */}
-      <CMSInitializer 
-        onVersionChange={setVersion} 
-        onLoadingChange={setLoading} 
-        onErrorChange={setError} 
-      />
-      
-      {/* Real-time updates */}
-      <RealtimeUpdates 
-        onVersionChange={setVersion} 
-        initialLoadDone={initialLoadDone.current} 
-      />
-      
-      {/* Custom CSS Manager */}
-      <CustomCSSManager customCSS={stylingStore.globalStyles.customCSS} />
-      
       {loading ? (
-        <LoadingScreen />
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-wedding-light-gray border-t-wedding-black rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-wedding-black">Loading content...</p>
+          </div>
+        </div>
       ) : error ? (
-        <ErrorScreen error={error} onRetry={handleRetry} />
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center max-w-md mx-auto p-6 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-700 mb-4">{error}</p>
+            <button 
+              className="px-4 py-2 bg-wedding-black text-white rounded hover:bg-wedding-dark-gray"
+              onClick={handleRetry}
+            >
+              Retry
+            </button>
+          </div>
+        </div>
       ) : (
-        <MainContent />
+        <>
+          <HeroSection key={`hero-section-${version}`} />
+          <StatsBar />
+          <BenefitsSection />
+          <NetworkMembersSection />
+          <PricingTables />
+          <TestimonialsSection />
+          <CtaSection />
+          <Footer />
+        </>
       )}
     </div>
   );
