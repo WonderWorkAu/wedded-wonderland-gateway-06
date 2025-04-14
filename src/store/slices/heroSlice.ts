@@ -6,7 +6,6 @@ import { updateContent } from '@/services/cmsService';
 export interface HeroSlice {
   heroContent: HeroContent;
   updateHeroContent: (content: Partial<HeroContent>) => Promise<boolean>;
-  forceHeroRefresh: () => void;
 }
 
 const initialHeroContent: HeroContent = {
@@ -42,12 +41,12 @@ export const createHeroSlice: StateCreator<HeroSlice> = (set, get) => ({
     
     // Sync with Supabase using async/await for better error handling
     try {
-      // Make 5 attempts to update the content with exponential backoff
-      for (let attempt = 0; attempt < 5; attempt++) {
+      // Make 3 attempts to update the content with exponential backoff
+      for (let attempt = 0; attempt < 3; attempt++) {
         if (attempt > 0) {
           console.log(`Retrying update (attempt ${attempt + 1})...`);
           // Wait longer between each retry
-          await new Promise(resolve => setTimeout(resolve, attempt * 1500));
+          await new Promise(resolve => setTimeout(resolve, attempt * 1000));
         }
         
         success = await updateContent('heroContent', currentContent);
@@ -65,11 +64,5 @@ export const createHeroSlice: StateCreator<HeroSlice> = (set, get) => ({
     }
     
     return success;
-  },
-  
-  forceHeroRefresh: () => {
-    // Force a refresh by cloning and re-applying the current content
-    const current = get().heroContent;
-    set({ heroContent: { ...current } });
   },
 });
