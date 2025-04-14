@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,64 +7,74 @@
 
 @layer base {
   :root {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 100%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 100%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+
     --primary: 0 0% 0%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 20%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 0 0% 40%;
-    --muted-foreground: 0 0% 100%;
-    --accent: 0 0% 50%;
+
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 0%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 0 0% 96%;
     --accent-foreground: 0 0% 0%;
-    --destructive: 0 0% 0%;
+
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 60%;
-    --input: 0 0% 70%;
+
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
     --ring: 0 0% 0%;
-    --radius: 0.5rem;
+
+    --radius: 0rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-primary: 0 0% 0%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 0 0% 89.8%;
+    --sidebar-ring: 0 0% 0%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.9%;
   }
 }
 
@@ -75,32 +86,34 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Montserrat', sans-serif;
+    letter-spacing: 0.015em;
   }
 
   h1, h2, h3, h4, h5 {
     font-family: 'Cormorant Garamond', serif;
+    letter-spacing: 0.02em;
   }
 }
 
 @layer components {
   .wedded-title {
-    @apply font-['Cormorant_Garamond'] font-bold text-white;
+    @apply font-['Cormorant_Garamond'] font-bold text-wedding-black;
   }
   
   .shimmer {
-    @apply bg-gradient-to-r from-black/20 via-white/20 to-black/20 bg-[length:200%_100%] animate-shimmer;
+    @apply bg-gradient-to-r from-transparent via-wedding-medium-gray/10 to-transparent bg-[length:200%_100%] animate-shimmer;
   }
   
-  .gold-gradient {
-    @apply bg-gradient-to-r from-white via-gray-300 to-white bg-clip-text text-transparent;
+  .bw-gradient {
+    @apply bg-gradient-to-r from-wedding-black via-wedding-dark-gray to-wedding-black bg-clip-text text-transparent;
   }
   
   .cta-button {
-    @apply bg-white text-black font-semibold py-3 px-6 rounded-md hover:bg-gray-200 transition duration-300 shadow-lg;
+    @apply bg-wedding-black text-wedding-white font-semibold py-3 px-6 hover:bg-wedding-dark-gray transition duration-300;
   }
   
-  .gold-button {
-    @apply bg-gradient-to-r from-white via-gray-200 to-white text-black font-semibold py-3 px-6 rounded-md hover:shadow-xl transition duration-300 shadow-lg hover:from-white hover:via-gray-100 hover:to-white;
+  .black-button {
+    @apply bg-wedding-black text-wedding-white font-semibold py-3 px-6 hover:bg-wedding-dark-gray transition duration-300;
   }
   
   .section-padding {
@@ -108,18 +121,18 @@
   }
   
   .value-badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors bg-wedding-purple/10 text-wedding-deep-purple;
+    @apply inline-flex items-center rounded-none px-2.5 py-0.5 text-xs font-semibold transition-colors bg-wedding-light-gray text-wedding-black;
   }
   
   .benefit-card {
-    @apply bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100;
+    @apply bg-wedding-white rounded-none p-6 shadow-md hover:shadow-lg transition-all duration-300 border border-wedding-light-gray;
   }
   
   .testimonial-card {
-    @apply bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-none;
+    @apply bg-wedding-white rounded-none p-6 shadow-md hover:shadow-lg transition-all duration-300 border-wedding-light-gray border;
   }
   
   .feature-icon-wrapper {
-    @apply bg-wedding-light-purple/20 p-4 rounded-full mb-4 text-wedding-deep-purple inline-flex items-center justify-center;
+    @apply bg-wedding-light-gray p-4 rounded-none mb-4 text-wedding-black inline-flex items-center justify-center;
   }
 }
